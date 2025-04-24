@@ -1,0 +1,9 @@
+*.iml
+.idea
+*venv*
+
+__pycache__
+*.pyc
+
+data/*.db
+scripts/load_covid19datahub.py
