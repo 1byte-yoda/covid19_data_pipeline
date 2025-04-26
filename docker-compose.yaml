@@ -1,0 +1,31 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    env_file: .env
+    command: server --console-address ":9001" /data
+    hostname: minio
+    volumes:
+      - ./data/minio/data:/data
+    ports:
+      - "9050:9000"
+      - "9051:9001"
+
+  dagster:
+    build:
+      context: .
+      dockerfile: ./docker/dagster/Dockerfile
+    container_name: dagster
+    env_file: .env
+    restart: always
+    volumes:
+      - ./dagster_home:/dagster_home
+      - ./pipeline:/pipeline
+      - ./covid19_dbt:/covid19_dbt
+    ports:
+      - "3000:3000"
+#    depends_on:
+#      generator:
+#        condition: service_completed_successfully
+#      dbt:
+#        condition: service_completed_successfully
