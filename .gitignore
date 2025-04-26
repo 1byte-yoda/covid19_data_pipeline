@@ -6,4 +6,16 @@ __pycache__
 *.pyc
 
 data/*.db
-scripts/load_covid19datahub.py
+data/minio
+
+.dlt
+*.env
+
+.logs_queue
+.nux
+.telemetry
+history
+schedules
+storage
+
+scripts
