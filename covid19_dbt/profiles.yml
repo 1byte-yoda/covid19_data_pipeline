@@ -1,0 +1,13 @@
+base:
+  outputs:
+    dev:
+      type: duckdb
+  target: dev
+
+covid19_dbt:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_FILE_PATH') }}"
+      schema: covid19

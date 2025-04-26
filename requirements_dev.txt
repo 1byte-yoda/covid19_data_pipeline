@@ -1,3 +1,0 @@
-covid19dh
-pandas
-mysql-connector-python
