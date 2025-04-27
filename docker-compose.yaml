@@ -3,6 +3,7 @@ services:
     image: minio/minio:latest
     container_name: minio
     env_file: .env
+    restart: always
     command: server --console-address ":9001" /data
     hostname: minio
     volumes:
@@ -10,6 +11,16 @@ services:
     ports:
       - "9050:9000"
       - "9051:9001"
+
+  dbt:
+    build:
+      context: .
+      dockerfile: ./docker/dbt/Dockerfile
+    container_name: dbt
+    env_file: .env
+    volumes:
+      - ./data/duckdb:/data/duckdb
+      - ./covid19_dbt:/covid19_dbt
 
   dagster:
     build:
@@ -24,8 +35,8 @@ services:
       - ./covid19_dbt:/covid19_dbt
     ports:
       - "3000:3000"
-#    depends_on:
-#      generator:
-#        condition: service_completed_successfully
-#      dbt:
-#        condition: service_completed_successfully
+    depends_on:
+      minio:
+        condition: service_started
+      dbt:
+        condition: service_started

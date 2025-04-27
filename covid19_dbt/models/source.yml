@@ -1,0 +1,15 @@
+version: 2
+sources:
+  - name: delta_source
+    config:
+      plugin: delta
+      #materialization: view
+    tables:
+      - name: timeseries
+        meta:
+          delta_table_path: "s3://covid-data-pipeline/covid19/github_csse_daily"
+          storage_options:
+            allow_http: true
+            endpoint_url: "{{ env_var('ENDPOINT_URL') }}"
+            access_key_id: "{{ env_var('MINIO_ACCESS_KEY') }}"
+            access_key_secret: "{{ env_var('MINIO_SECRET_KEY') }}"
