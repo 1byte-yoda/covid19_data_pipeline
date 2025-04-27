@@ -40,3 +40,18 @@ services:
         condition: service_started
       dbt:
         condition: service_started
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: ./docker/jupyter/Dockerfile
+    container_name: jupyter
+    env_file: .env
+    volumes:
+      - ./adhoc:/home/jovyan/work
+      - ./data/duckdb:/data/duckdb
+    ports:
+      - "8888:8888"
+    depends_on:
+      minio:
+        condition: service_started
