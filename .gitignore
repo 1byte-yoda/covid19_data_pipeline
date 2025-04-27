@@ -8,6 +8,7 @@ __pycache__
 
 data/*.db
 data/minio
+data/location_coordinates.csv
 *.duckdb
 
 .dlt
@@ -21,3 +22,5 @@ schedules
 storage
 
 scripts
+
+.ipynb_checkpoints
