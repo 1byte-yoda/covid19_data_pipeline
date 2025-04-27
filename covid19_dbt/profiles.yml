@@ -4,16 +4,3 @@ covid19_dbt:
     dev:
       type: duckdb
       path: "{{ env_var('DUCKDB_FILE_PATH') }}"
-      schema: covid19
-      extensions:
-        - httpfs
-        - delta
-      threads: 1
-      filesystems:
-        - fs: s3
-          anon: false
-          key: "{{ env_var('MINIO_ACCESS_KEY') }}"
-          secret: "{{ env_var('MINIO_SECRET_KEY') }}"
-          client_kwargs:
-            endpoint_url: "{{ env_var('ENDPOINT_URL') }}"
-            use_ssl: false

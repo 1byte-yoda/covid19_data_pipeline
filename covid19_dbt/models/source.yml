@@ -1,15 +1,12 @@
 version: 2
 sources:
   - name: delta_source
-    config:
-      plugin: delta
-      #materialization: view
+    meta:
+      external_location: "delta_scan('{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/{name}')"
     tables:
-      - name: timeseries
-        meta:
-          delta_table_path: "s3://covid-data-pipeline/covid19/github_csse_daily"
-          storage_options:
-            allow_http: true
-            endpoint_url: "{{ env_var('ENDPOINT_URL') }}"
-            access_key_id: "{{ env_var('MINIO_ACCESS_KEY') }}"
-            access_key_secret: "{{ env_var('MINIO_SECRET_KEY') }}"
+      - name: github_csse_daily
+  - name: csv_source
+    meta:
+      external_location: "{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/google_geolocation/{name}.csv"
+    tables:
+      - name: location_coordinates

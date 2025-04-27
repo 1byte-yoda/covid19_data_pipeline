@@ -32,8 +32,8 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   covid19_dbt:
-    covid19:
-      +materialized: table
+    raw:
+      +materialized: view
     example:
       +materialized: view
     +pre-hook: "{{ create_minio_secret(secret) }}"
