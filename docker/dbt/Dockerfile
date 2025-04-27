@@ -3,6 +3,13 @@ FROM python:3.11-slim
 RUN apt-get update
 
 RUN apt-get install -y --no-install-recommends curl
+RUN apt-get update
+RUN apt-get install -y git g++ cmake ninja-build libssl-dev
+RUN git clone https://github.com/duckdb/duckdb
+RUN cd duckdb
+RUN GEN=ninja make
+
+ENV PATH "$PATH:/duckdb/build/release/"
 
 RUN pip install uv
 

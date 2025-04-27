@@ -1,4 +1,8 @@
 {% macro create_minio_secret(secret_name) %}
+    INSTALL httpfs;
+    LOAD httpfs;
+    INSTALL delta;
+    LOAD delta;
     CREATE OR REPLACE PERSISTENT SECRET {{ secret_name }} (
            TYPE s3,
            PROVIDER config,
