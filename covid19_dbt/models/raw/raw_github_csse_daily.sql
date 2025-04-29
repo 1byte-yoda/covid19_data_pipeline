@@ -1,5 +1,3 @@
-{{ config(schema = 'raw') }}
-
 SELECT id,
        confirmed,
        deaths,
@@ -13,6 +11,4 @@ SELECT id,
        year,
        month,
        day
-FROM {{ source('delta_source', 'github_csse_daily') }}
-
-
+FROM {{ source('jhu_covid', 'github_csse_daily') }}

@@ -1,5 +1,3 @@
-{{ config(schema = 'raw') }}
-
 SELECT id,
        combined_key,
        province_state,
@@ -11,6 +9,6 @@ SELECT id,
        lat,
        longx,
        load_date
-FROM {{ source('delta_source', 'github_csse_daily') }}
+FROM {{ source('jhu_covid', 'github_csse_daily') }}
 
 

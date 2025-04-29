@@ -34,6 +34,14 @@ models:
   covid19_dbt:
     raw:
       +materialized: view
-    example:
+      +schema: raw
+    cleansed:
+      +materialized: table
+      +schema: cleansed
+    curated:
+      +materialized: table
+      +schema: curated
+    marts:
       +materialized: view
+      +schema: marts
     +pre-hook: "{{ create_minio_secret(secret) }}"
