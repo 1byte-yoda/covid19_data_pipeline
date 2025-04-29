@@ -1,5 +1,5 @@
 WITH covid19 AS (
-    SELECT id AS covid_id,
+    SELECT id,
            CASE WHEN confirmed < 0 THEN confirmed * -1 ELSE confirmed END AS confirmed,
            CASE WHEN deaths < 0 THEN deaths * -1 ELSE deaths END AS deaths,
            CASE WHEN recovered < 0 THEN recovered * -1 ELSE recovered END AS recovered,
