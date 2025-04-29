@@ -24,3 +24,5 @@ storage
 scripts
 
 .ipynb_checkpoints
+adhoc/*.csv
+adhoc/*.db
