@@ -10,6 +10,6 @@
            SECRET '{{ env_var("MINIO_SECRET_KEY") }}',
            URL_STYLE 'path',
            USE_SSL false,
-           ENDPOINT '{{ env_var("ENDPOINT_URL") }}'
+           ENDPOINT '{{ env_var("MINIO_ENDPOINT_URL") }}'
     );
 {% endmacro %}

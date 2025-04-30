@@ -1,6 +1,10 @@
 WITH covid_cases AS (
     SELECT DISTINCT
         cl.location_id,
+        cl.country,
+        cl.state,
+        cl.city,
+        cl.administrative_area_level,
         strftime(t.last_update, '%Y-%m-%d') AS last_update_date,
         t.confirmed,
         t.deaths,
@@ -13,6 +17,10 @@ WITH covid_cases AS (
 ), covid_cases_with_date_id AS (
     SELECT DISTINCT
         t.location_id,
+        country,
+        state,
+        city,
+        administrative_area_level,
         {{ dbt_utils.generate_surrogate_key(['last_update_date']) }} AS date_id,
         t.confirmed,
         t.deaths,

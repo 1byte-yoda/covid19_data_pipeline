@@ -56,7 +56,7 @@ SELECT t.id,
     FROM {{ source ('jhu_covid', 'covid19datahub') }} AS t
 )
 
-SELECT {{ dbt_utils.generate_surrogate_key(['state', 'country', 'city']) }} AS location_id,
+SELECT {{ dbt_utils.generate_surrogate_key(['country', 'state', 'city', 'administrative_area_level']) }} AS location_id,
        *
 FROM covid_datahub
 

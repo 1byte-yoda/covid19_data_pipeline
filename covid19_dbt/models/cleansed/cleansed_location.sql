@@ -24,13 +24,13 @@ WITH raw_location_cleaned AS (
                ELSE -1
            END AS administrative_area_level,
            t1.state,
-           t1.country,
+           CASE WHEN t1.country == 'US' THEN 'United States' ELSE t1.country END AS country,
            t1.fips,
            t1.city
     FROM raw_location_cleaned AS t1
     LEFT JOIN {{ ref('raw_googlemaps_coordinates') }} AS rlc ON rlc.combined_key = t1.combined_key
 )
 
-SELECT {{ dbt_utils.generate_surrogate_key(['state', 'country', 'city']) }} AS location_id,
+SELECT {{ dbt_utils.generate_surrogate_key(['country', 'state', 'city', 'administrative_area_level']) }} AS location_id,
        *
 FROM _cleansed_location
