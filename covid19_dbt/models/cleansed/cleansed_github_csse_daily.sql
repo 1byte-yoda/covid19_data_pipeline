@@ -4,22 +4,12 @@ WITH covid19 AS (
            CASE WHEN deaths < 0 THEN deaths * -1 ELSE deaths END AS deaths,
            CASE WHEN recovered < 0 THEN recovered * -1 ELSE recovered END AS recovered,
            CASE WHEN active < 0 THEN active * -1 ELSE active END AS active,
+           CASE WHEN case_fatality_ratio < 0 THEN case_fatality_ratio * -1 ELSE case_fatality_ratio END AS case_fatality_ratio,
            CASE
                WHEN COALESCE(incidence_rate, incident_rate) < 0 THEN COALESCE(incidence_rate, incident_rate) * -1
                ELSE COALESCE(incidence_rate, incident_rate)
            END AS incident_rate,
-           CASE
-               WHEN case_fatality_ratio < 0 THEN case_fatality_ratio * -1
-               ELSE case_fatality_ratio
-           END AS case_fatality_ratio,
-           COALESCE(
-                   try_strptime(last_update, '%Y-%m-%dT%H:%M:%S'),
-                   try_strptime(last_update, '%Y-%m-%d %H:%M:%S'),
-                   try_strptime(last_update, '%Y-%m-%d %H:%M'),
-                   try_strptime(last_update, '%-m/%-d/%Y %H:%M'),
-                   try_strptime(last_update, '%-m/%-d/%-y %-H:%-M'),
-                   try_strptime(last_update, '%-m/%-d/%Y %H:%M')
-           ) AS last_update,
+           {{ try_parse_timestamp('last_update') }} AS last_update,
            load_date,
            year,
            month,

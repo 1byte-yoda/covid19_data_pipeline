@@ -1,36 +1,51 @@
-WITH raw_location_cleaned AS (
-    SELECT id,
-           REPLACE(combined_key, 'Unknown', 'Unassigned') AS combined_key,
-           COALESCE(REPLACE(province_state, 'Unknown', 'Unassigned'), 'Unassigned') AS state,
-           COALESCE(REPLACE(country_region, 'Unknown', 'Unassigned'), 'Unassigned') AS country,
-           COALESCE(REPLACE(admin2, 'Unknown', 'Unassigned'), 'Unassigned') AS city,
-           CASE WHEN latitude = 0 THEN NULL ELSE latitude END AS latitude,
-           CASE WHEN longitude = 0 THEN NULL ELSE longitude END AS longitude,
-           CASE WHEN lat = 0 THEN NULL ELSE lat END AS lat,
-           CASE WHEN longx = 0 THEN NULL ELSE longx END AS longx,
-           COALESCE(fips::INT, -9999) AS fips
+WITH raw_location_cleansed AS (
+    SELECT
+        id,
+        combined_key,
+        COALESCE({{ standardize_country('country_region') }}, 'Unassigned') AS country,
+        COALESCE({{ standardize_state('province_state') }}, 'Unassigned') AS state,
+        COALESCE(admin2, 'Unassigned') AS city,
+        COALESCE(fips::INT, -9999) AS fips,
+        NULLIF(latitude, 0) AS latitude,
+        NULLIF(longitude, 0) AS longitude,
+        NULLIF(lat, 0) AS lat,
+        NULLIF(longx, 0) AS longx
     FROM {{ ref('raw_location') }}
-), _cleansed_location AS (
-    SELECT id,
-           TRIM(
-               COALESCE(t1.combined_key, CONCAT(t1.state, ', ', t1.country), 'Unassigned'), ','
-           ) AS combined_key,
-           COALESCE(t1.latitude, t1.lat, rlc.latitude, 0) AS latitude,
-           COALESCE(t1.longitude, t1.longx, rlc.longitude, 0) AS longitude,
-           CASE
-               WHEN city IN ('Unassigned', 'Unknown') AND state IN ('Unassigned', 'Unknown') THEN 1
-               WHEN city IN ('Unassigned', 'Unknown') AND state NOT IN ('Unassigned', 'Unknown') THEN 2
-               WHEN city NOT IN ('Unassigned', 'Unknown') AND state NOT IN ('Unassigned', 'Unknown') THEN 3
-               ELSE -1
-           END AS administrative_area_level,
-           t1.state,
-           CASE WHEN t1.country == 'US' THEN 'United States' ELSE t1.country END AS country,
-           t1.fips,
-           t1.city
-    FROM raw_location_cleaned AS t1
-    LEFT JOIN {{ ref('raw_googlemaps_coordinates') }} AS rlc ON rlc.combined_key = t1.combined_key
+),
+
+cleansed_location AS (
+     SELECT
+         id,
+         combined_key,
+         state,
+         city,
+         country,
+         fips,
+         LOWER(state) AS low_state,
+         LOWER(city) AS low_city,
+         LOWER(country) AS low_country,
+         COALESCE(latitude, lat) AS latitude,
+         COALESCE(longitude, longx) AS longitude,
+         CASE
+             WHEN city IN ('Unassigned', 'Unknown') AND state IN ('Unassigned', 'Unknown') THEN 1
+             WHEN city IN ('Unassigned', 'Unknown') THEN 2
+             WHEN city NOT IN ('Unassigned', 'Unknown') AND state NOT IN ('Unassigned', 'Unknown') THEN 3
+             ELSE -1
+         END AS administrative_area_level
+     FROM raw_location_cleansed
+),
+
+final_location AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['low_country', 'low_state', 'low_city', 'administrative_area_level']) }} AS location_id,
+        CASE
+            WHEN administrative_area_level = 3 THEN CONCAT(city, ', ', state, ', ', country)
+            WHEN administrative_area_level = 2 THEN CONCAT(state, ', ', country)
+            ELSE country
+        END AS combined_key,
+        * EXCLUDE(combined_key, low_country, low_state, low_city)
+    FROM cleansed_location
 )
 
-SELECT {{ dbt_utils.generate_surrogate_key(['country', 'state', 'city', 'administrative_area_level']) }} AS location_id,
-       *
-FROM _cleansed_location
+SELECT *
+FROM final_location
