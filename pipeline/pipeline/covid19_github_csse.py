@@ -1,7 +1,5 @@
 import hashlib
-import os
 from datetime import date, timedelta
-from functools import lru_cache
 from io import BytesIO
 from typing import Optional
 
@@ -37,19 +35,6 @@ def _create_hive_partition_fields(df: pd.DataFrame, ingest_date: date) -> pd.Dat
 def generate_md5(row: pd.Series):
     concat_str = f"{row['file_md5']}_{row['row_num']}"
     return hashlib.md5(concat_str.encode('utf-8')).hexdigest()
-
-
-@lru_cache
-def get_location_coordinates(addr: str) -> dict:
-    api_key = os.environ.get("GOOGLE_MAPS_API_KEY")
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?address={addr}&key={api_key}"
-    result = requests.get(url).json()
-    if not result.get("results"):
-        logger.debug("Cannot parse the following result:", result["results"])
-        return {"lat": 0, "lng": 0}
-
-    location = result["results"][0]["geometry"]["location"]
-    return location
 
 
 @dlt.resource(
