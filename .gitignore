@@ -10,6 +10,7 @@ data/*.db
 data/minio
 data/location_coordinates.csv
 *.duckdb
+data/duckdb/
 
 .dlt
 *.env
