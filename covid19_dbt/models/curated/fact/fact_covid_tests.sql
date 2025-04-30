@@ -22,11 +22,16 @@ FROM covid_tests
 
     daily_deltas AS (
 SELECT
-    *,
-    COALESCE(tests - LAG(tests) OVER (PARTITION BY location_id ORDER BY date_id), tests) AS daily_tests,
-    COALESCE(vaccines - LAG(vaccines) OVER (PARTITION BY location_id ORDER BY date_id), vaccines) AS daily_vaccines,
-    COALESCE(people_vaccinated - LAG(people_vaccinated) OVER (PARTITION BY location_id ORDER BY date_id), people_vaccinated) AS daily_people_vaccinated,
-    COALESCE(people_fully_vaccinated - LAG(people_fully_vaccinated) OVER (PARTITION BY location_id ORDER BY date_id), people_fully_vaccinated) AS daily_people_fully_vaccinated
+    * EXCLUDE (tests, vaccines, people_vaccinated, people_fully_vaccinated),
+    tests AS cum_tests,
+    vaccines AS cum_vaccines,
+    people_vaccinated AS cum_people_vaccinated,
+    people_fully_vaccinated AS cum_people_fully_vaccinated,
+    COALESCE(tests - LAG(tests) OVER (PARTITION BY location_id ORDER BY date_id), tests) AS tests,
+    COALESCE(vaccines - LAG(vaccines) OVER (PARTITION BY location_id ORDER BY date_id), vaccines) AS vaccines,
+    COALESCE(people_vaccinated - LAG(people_vaccinated) OVER (PARTITION BY location_id ORDER BY date_id), people_vaccinated) AS people_vaccinated,
+    COALESCE(people_fully_vaccinated - LAG(people_fully_vaccinated) OVER (PARTITION BY location_id ORDER BY date_id), people_fully_vaccinated) AS people_fully_vaccinated,
+
 FROM max_values
     )
 

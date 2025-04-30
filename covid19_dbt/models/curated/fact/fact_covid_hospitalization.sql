@@ -20,10 +20,13 @@ FROM covid_hosp
 
     daily_deltas AS (
 SELECT
-    *,
-    COALESCE(hosp - LAG(hosp) OVER (PARTITION BY location_id ORDER BY date_id), hosp) AS daily_hosp,
-    COALESCE(icu - LAG(icu) OVER (PARTITION BY location_id ORDER BY date_id), icu) AS daily_icu,
-    COALESCE(vent - LAG(vent) OVER (PARTITION BY location_id ORDER BY date_id), vent) AS daily_vent
+    * EXCLUDE (hosp, icu, vent),
+    hosp AS cum_hosp,
+    icu AS cum_icu,
+    vent AS cum_vent,
+    COALESCE(hosp - LAG(hosp) OVER (PARTITION BY location_id ORDER BY date_id), hosp) AS hosp,
+    COALESCE(icu - LAG(icu) OVER (PARTITION BY location_id ORDER BY date_id), icu) AS icu,
+    COALESCE(vent - LAG(vent) OVER (PARTITION BY location_id ORDER BY date_id), vent) AS vent
 FROM max_values
     )
 

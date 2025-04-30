@@ -21,33 +21,37 @@ SELECT DISTINCT
     t.active,
     t.incident_rate,
     t.case_fatality_ratio,
-    last_update,
     strftime(last_update, '%Y%m%d')::INT AS date_id
 FROM covid_cases AS t
     ),
 
-    covid_cases_with_deltas AS (
-    SELECT
-        *,
-        COALESCE(confirmed - LAG(confirmed) OVER (PARTITION BY location_id ORDER BY date_id), confirmed) AS daily_confirmed,
-        COALESCE(deaths - LAG(deaths) OVER (PARTITION BY location_id ORDER BY date_id), deaths) AS daily_deaths,
-        COALESCE(recovered - LAG(recovered) OVER (PARTITION BY location_id ORDER BY date_id), recovered) AS daily_recovered,
-        COALESCE(active - LAG(active) OVER (PARTITION BY location_id ORDER BY date_id), active) AS daily_active
-    FROM covid_cases_with_date_id
-    ),
-
     covid_cases_with_sk AS (
         SELECT {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id, *
-        FROM covid_cases_with_deltas
-    )
+        FROM covid_cases_with_date_id
+    ),
 
-SELECT DISTINCT covid_id,
-                FIRST_VALUE(confirmed) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS confirmed,
-        FIRST_VALUE(deaths) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS deaths,
-        FIRST_VALUE(recovered) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS recovered,
-        FIRST_VALUE(active) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS active,
-        FIRST_VALUE(incident_rate) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS incident_rate,
-        FIRST_VALUE(case_fatality_ratio) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS case_fatality_ratio,
-        FIRST_VALUE(last_update) OVER(PARTITION BY covid_id ORDER BY last_update DESC) AS last_update,
-        * EXCLUDE (covid_id, confirmed, deaths, recovered, active, incident_rate, case_fatality_ratio, last_update)
-FROM covid_cases_with_sk
+    unique_covid_cases AS (
+    SELECT DISTINCT covid_id,
+                    FIRST_VALUE(confirmed) OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS confirmed,
+            FIRST_VALUE(deaths) OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS deaths,
+            FIRST_VALUE(recovered) OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS recovered,
+            FIRST_VALUE(active) OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS active,
+            FIRST_VALUE(incident_rate) OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS incident_rate,
+            FIRST_VALUE(case_fatality_ratio) OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS case_fatality_ratio,
+            * EXCLUDE (covid_id, confirmed, deaths, recovered, active, incident_rate, case_fatality_ratio)
+    FROM covid_cases_with_sk
+)
+
+
+SELECT
+    * EXCLUDE (confirmed, deaths, recovered, active),
+    confirmed AS cum_confirmed,
+    deaths AS cum_deaths,
+    recovered AS cum_recovered,
+    active AS cum_active,
+    COALESCE(confirmed - LAG(confirmed) OVER (PARTITION BY location_id ORDER BY date_id), confirmed) AS confirmed,
+    COALESCE(deaths - LAG(deaths) OVER (PARTITION BY location_id ORDER BY date_id), deaths) AS deaths,
+    COALESCE(recovered - LAG(recovered) OVER (PARTITION BY location_id ORDER BY date_id), recovered) AS recovered,
+    COALESCE(active - LAG(active) OVER (PARTITION BY location_id ORDER BY date_id), active) AS active
+FROM unique_covid_cases
+
