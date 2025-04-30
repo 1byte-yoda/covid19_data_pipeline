@@ -4,3 +4,4 @@ covid19_dbt:
     dev:
       type: duckdb
       path: "{{ env_var('DUCKDB_FILE_PATH') }}"
+      threads: 1

@@ -5,7 +5,7 @@ WITH generate_date AS (
         RANGE(DATE '2020-01-01', DATE '2030-12-31', INTERVAL 1 DAY)
       )
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['date_value']) }} AS date_id,
+    strftime(date_value, '%Y%m%d')::INT AS date_id,
     date_value,
     DAYOFYEAR(date_value) AS day_of_year,
     DAYNAME(date_value) AS day_name,
