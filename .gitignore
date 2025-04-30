@@ -21,6 +21,7 @@ data/duckdb/
 history
 schedules
 storage
+dagster_home/logs/*
 
 scripts
 
