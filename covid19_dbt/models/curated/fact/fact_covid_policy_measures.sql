@@ -51,5 +51,3 @@ SELECT
     {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id,
     *
 FROM forward_filled
-
--- 6f33ef9c3aaaeed80dcebe5a2744f08a, 20230202, India, Andaman And Nicobar

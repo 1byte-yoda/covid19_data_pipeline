@@ -14,20 +14,20 @@ SELECT t.id,
        ,
 
     -- Government Policy Measures
-        school_closing
-       , workplace_closing
-       , cancel_events
-       , gatherings_restrictions
-       , transport_closing
-       , stay_home_restrictions
-       , internal_movement_restrictions
-       , international_movement_restrictions
-       , information_campaigns
-       , testing_policy
-       , contact_tracing
-       , facial_coverings
-       , vaccination_policy
-       , elderly_people_protection
+        COALESCE(school_closing, 0) AS school_closing
+       , COALESCE(workplace_closing, 0) AS workplace_closing
+       , COALESCE(cancel_events, 0) AS cancel_events
+       , COALESCE(gatherings_restrictions, 0) AS gatherings_restrictions
+       , COALESCE(transport_closing, 0) AS transport_closing
+       , COALESCE(stay_home_restrictions, 0) AS stay_home_restrictions
+       , COALESCE(internal_movement_restrictions, 0) AS internal_movement_restrictions
+       , COALESCE(international_movement_restrictions, 0) AS international_movement_restrictions
+       , COALESCE(information_campaigns, 0) AS information_campaigns
+       , COALESCE(testing_policy, 0) AS testing_policy
+       , COALESCE(contact_tracing, 0) AS contact_tracing
+       , COALESCE(facial_coverings, 0) AS facial_coverings
+       , COALESCE(vaccination_policy, 0) AS vaccination_policy
+       , COALESCE(elderly_people_protection, 0) AS elderly_people_protection
        ,
 
     -- Index Policies

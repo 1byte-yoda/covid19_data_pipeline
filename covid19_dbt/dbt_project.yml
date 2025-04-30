@@ -42,6 +42,6 @@ models:
       +materialized: table
       +schema: curated
     marts:
-      +materialized: view
+      +materialized: table
       +schema: marts
     +pre-hook: "{{ create_minio_secret(secret) }}"
