@@ -1,0 +1,4 @@
+# Ignore anything in the "temp" path
+target/
+macros/
+dbt_packages/

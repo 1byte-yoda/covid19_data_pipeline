@@ -15,3 +15,6 @@ pydantic==2.11.3
 watchdog==5.0.3
 pandas==2.2.3
 loguru==0.7.3
+
+sqlfluff
+sqlfluff-templater-dbt
