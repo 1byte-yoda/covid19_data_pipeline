@@ -2,6 +2,7 @@ dagster==1.10.12
 dagster-dbt==0.26.12
 duckdb==1.2.2
 dlt==1.10.0
+deltalake
 dlt[filesystem]
 dlt[deltalake]
 pyarrow==17.0.0
