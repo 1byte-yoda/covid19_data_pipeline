@@ -20,6 +20,7 @@ services:
     env_file: .env
     volumes:
       - ./data/duckdb:/data/duckdb
+      - ./data/duckdb/stored_secrets:/home/.duckdb/stored_secrets
       - ./covid19_dbt:/covid19_dbt
 
   dagster:
@@ -41,17 +42,40 @@ services:
       dbt:
         condition: service_started
 
-  jupyter:
+#  jupyter:
+#    build:
+#      context: .
+#      dockerfile: ./docker/jupyter/Dockerfile
+#    container_name: jupyter
+#    env_file: .env
+#    volumes:
+#      - ./adhoc:/home/jovyan/work
+#      - ./data/duckdb:/home/jovyan/.duckdb
+#      - ./data/duckdb:/data/duckdb
+#    ports:
+#      - "8888:8888"
+#    depends_on:
+#      minio:
+#        condition: service_started
+
+  superset:
     build:
       context: .
-      dockerfile: ./docker/jupyter/Dockerfile
-    container_name: jupyter
+      dockerfile: ./docker/superset/Dockerfile
+      args:
+        POSTGRES_USER: $POSTGRES_USER
+        POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+        SUPERSET_ADMIN: $SUPERSET_ADMIN
+        SUPERSET_PASSWORD: $SUPERSET_PASSWORD
+        SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+    container_name: superset
     env_file: .env
-    volumes:
-      - ./adhoc:/home/jovyan/work
-      - ./data/duckdb:/data/duckdb
     ports:
-      - "8888:8888"
+      - "8088:8088"
+    volumes:
+      - ./data/duckdb:/app/superset_home/db
+      - ./data/duckdb/stored_secrets:/home/superset/.duckdb/stored_secrets
     depends_on:
-      minio:
-        condition: service_started
+      - dagster
+#    post_start:
+#      - command: "superset import-dashboards -p ./dashboard.zip -u ${SUPERSET_ADMIN}"
