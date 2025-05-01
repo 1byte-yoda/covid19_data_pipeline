@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Mapping, Any
 
 import dlt
 from dagster_dbt import DbtCliResource, dbt_assets
@@ -11,7 +10,7 @@ from dagster_embedded_elt.dlt import DagsterDltResource, dlt_assets
 
 from .covid19_github_csse import covid_github_source
 from .covid_datahub import covid_datahub_source
-from .project import covid19_dbt_project
+from ..project import covid19_dbt_project
 
 daily_partitions = DailyPartitionsDefinition(start_date="01-01-2020", fmt="%m-%d-%Y")
 # end_date="01-10-2023",

@@ -1,5 +1,5 @@
 #!/bin/bash
 
 
-cd /pipeline
+cd /dagster
 exec dagster dev -h 0.0.0.0

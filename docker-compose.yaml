@@ -33,7 +33,7 @@ services:
     volumes:
       - ./data/duckdb:/data/duckdb
       - ./dagster_home:/dagster_home
-      - ./pipeline:/pipeline
+      - ./dagster:/dagster
       - ./covid19_dbt:/covid19_dbt
     ports:
       - "3000:3000"

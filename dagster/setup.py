@@ -1,11 +1,11 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="pipeline",
+    name="covid_pipeline",
     version="0.0.1",
     packages=find_packages(),
     package_data={
-        "pipeline": [
+        "covid_pipeline": [
             "dbt-project/**/*",
         ],
     },
