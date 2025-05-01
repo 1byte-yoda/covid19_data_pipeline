@@ -45,4 +45,4 @@ SELECT
     ,t.hosp
     ,t.icu
     ,t.vent
-FROM {{ source('jhu_covid', 'covid19datahub') }} AS t
+FROM {{ source('delta_source', 'covid19datahub') }} AS t

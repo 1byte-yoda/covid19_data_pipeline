@@ -38,7 +38,7 @@ def generate_md5(row: pd.Series):
 
 
 @dlt.resource(
-    name="covid_cases_github",
+    name="github_csse_daily",
     table_format="delta",
     table_name="github_csse_daily",
     columns={"year": {"partition": True}, "month": {"partition": True}, "day": {"partition": True}},
@@ -64,7 +64,7 @@ def get_github_csse_daily(start_date: date, end_date: date):
 
 
 @dlt.source
-def github_source(start_date: Optional[date] = None, end_date: Optional[date] = None):
+def covid_github_source(start_date: Optional[date] = None, end_date: Optional[date] = None):
     if start_date is None:
         start_date = date.today()
         end_date = date.today()

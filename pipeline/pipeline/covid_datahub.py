@@ -8,7 +8,7 @@ from deltalake import DeltaTable
 
 
 @dlt.resource(
-    name="covid_cases_coviddatahub",
+    name="covid19datahub",
     table_format="delta",
     table_name="covid19datahub",
     columns={"year": {"partition": True}, "month": {"partition": True}, "day": {"partition": True}},

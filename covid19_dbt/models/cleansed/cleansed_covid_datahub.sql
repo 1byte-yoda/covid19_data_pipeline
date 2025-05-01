@@ -49,7 +49,7 @@ WITH covid_datahub AS (
         t.hosp
         ,t.icu
         ,t.vent
-    FROM {{ source ('jhu_covid', 'covid19datahub') }} AS t
+    FROM {{ ref ('raw_covid_datahub') }} AS t
 )
 
 SELECT

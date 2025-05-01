@@ -31,6 +31,7 @@ services:
     env_file: .env
     restart: always
     volumes:
+      - ./data/duckdb:/data/duckdb
       - ./dagster_home:/dagster_home
       - ./pipeline:/pipeline
       - ./covid19_dbt:/covid19_dbt

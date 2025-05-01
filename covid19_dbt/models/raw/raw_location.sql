@@ -10,4 +10,4 @@ SELECT
     ,lat
     ,longx
     ,load_date
-FROM {{ source('jhu_covid', 'github_csse_daily') }}
+FROM {{ source('delta_source', 'github_csse_daily') }}
