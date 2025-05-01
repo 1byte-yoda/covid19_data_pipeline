@@ -1,5 +1,5 @@
 import hashlib
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, UTC
 from typing import Optional
 
 import dlt
@@ -25,6 +25,7 @@ def get_covid_datahub(start_date: date, end_date: date):
         df = DeltaTable(bucket_url, storage_options=storage_options).to_pandas(partitions=partitions)
         df["row_num"] = df.groupby("date").cumcount() + 1
         df["row_key"] = df.apply(lambda row: hashlib.md5(f"{row['id']}_{row['date']}_{row['row_num']}".encode()).hexdigest(), axis=1)
+        df["updated_at"] = datetime.now(tz=UTC)
         yield df
         query_date = query_date + timedelta(days=1)
 

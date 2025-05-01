@@ -1,5 +1,5 @@
 import hashlib
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, UTC
 from io import BytesIO
 from typing import Optional
 
@@ -59,6 +59,7 @@ def get_github_csse_daily(start_date: date, end_date: date):
         df = _create_hive_partition_fields(df=df, ingest_date=partition_date)
         df["after_load_rows"] = df.shape[0]
         df["after_load_cols"] = str(list(df.columns))
+        df["updated_at"] = datetime.now(tz=UTC)
         yield df
         partition_date = partition_date + timedelta(days=1)
 
