@@ -18,3 +18,4 @@ loguru==0.7.3
 
 sqlfluff
 sqlfluff-templater-dbt
+yamlfix
