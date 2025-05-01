@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /covid19_dbt
+cd /transformer
 dbt deps
 dbt seed
 dbt compile

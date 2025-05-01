@@ -21,7 +21,7 @@ services:
     volumes:
       - ./data/duckdb:/data/duckdb
       - ./data/duckdb/stored_secrets:/home/.duckdb/stored_secrets
-      - ./covid19_dbt:/covid19_dbt
+      - ./transformer:/transformer
 
   dagster:
     build:
@@ -34,7 +34,7 @@ services:
       - ./data/duckdb:/data/duckdb
       - ./dagster_home:/dagster_home
       - ./dagster:/dagster
-      - ./covid19_dbt:/covid19_dbt
+      - ./transformer:/transformer
     ports:
       - "3000:3000"
     depends_on:

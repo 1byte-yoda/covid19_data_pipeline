@@ -1,4 +1,4 @@
-covid19_dbt:
+covid19:
   target: dev
   outputs:
     dev:

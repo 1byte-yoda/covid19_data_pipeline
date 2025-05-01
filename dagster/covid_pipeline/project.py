@@ -3,7 +3,7 @@ from pathlib import Path
 from dagster_dbt import DbtProject
 
 
-DBT_PROJECT_NAME = "covid19_dbt"
+DBT_PROJECT_NAME = "transformer"
 
 
 def get_project_root():
@@ -15,6 +15,6 @@ def get_project_root():
 
 
 covid19_dbt_project = DbtProject(
-    project_dir=Path(__file__).joinpath("..", "..", "..", "covid19_dbt").resolve()
+    project_dir=Path(__file__).joinpath("..", "..", "..", "transformer").resolve()
 )
 covid19_dbt_project.prepare_if_dev()
