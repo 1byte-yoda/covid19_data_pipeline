@@ -1,9 +1,10 @@
+---
 run_coordinator:
   module: dagster.core.run_coordinator
   class: QueuedRunCoordinator
   config:
     max_concurrent_runs: 8
     tag_concurrency_limits:
-      - key: "dagster/backfill"
-        value: "true"
+      - key: dagster/backfill
+        value: 'true'
         limit: 2
