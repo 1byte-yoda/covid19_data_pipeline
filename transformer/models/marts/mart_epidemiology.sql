@@ -1,3 +1,4 @@
+{{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
 SELECT
     f1.covid_id
     ,dd.date_id AS date_key
@@ -46,3 +47,7 @@ INNER JOIN {{ ref('dim_date') }} AS dd ON f1.date_id = dd.date_id
 LEFT JOIN {{ ref('fact_covid_hospitalization') }} AS f2 ON f1.covid_id = f2.covid_id
 LEFT JOIN {{ ref('fact_covid_policy_measures') }} AS f3 ON f1.covid_id = f3.covid_id
 LEFT JOIN {{ ref('fact_covid_tests') }} AS f4 ON f1.covid_id = f4.covid_id
+WHERE 1 = 1
+{% if is_incremental() %}
+  AND dd.date_value >= '{{ var('min_date') }}' AND dd.date_value <= '{{ var('max_date') }}'
+{% endif %}

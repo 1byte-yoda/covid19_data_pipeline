@@ -1,3 +1,4 @@
+{{ config(unique_key='id', incremental_strategy="delete+insert") }}
 WITH raw_location_cleansed AS (
     SELECT
         id
@@ -10,6 +11,7 @@ WITH raw_location_cleansed AS (
         ,NULLIF(longitude,0) AS longitude
         ,NULLIF(lat,0) AS lat
         ,NULLIF(longx,0) AS longx
+        ,last_update
     FROM {{ ref('raw_location') }}
 )
 
@@ -26,6 +28,7 @@ WITH raw_location_cleansed AS (
         ,LOWER(country) AS low_country
         ,COALESCE(latitude,lat) AS latitude
         ,COALESCE(longitude,longx) AS longitude
+        ,last_update
         ,CASE
             WHEN city IN ('Unassigned','Unknown') AND state IN ('Unassigned','Unknown') THEN 1
             WHEN city IN ('Unassigned','Unknown') THEN 2
@@ -49,3 +52,7 @@ WITH raw_location_cleansed AS (
 
 SELECT *
 FROM final_location
+WHERE 1 = 1
+    {% if is_incremental() %}
+  AND last_update >= '{{ var('min_date') }}' AND last_update <= '{{ var('max_date') }}'
+{% endif %}

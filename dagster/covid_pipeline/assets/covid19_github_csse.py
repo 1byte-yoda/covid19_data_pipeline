@@ -12,10 +12,10 @@ import dlt
 
 def _safe_download_covid_df_with_md5(url: str) -> pd.DataFrame:
     try:
-        print("Downloading CSV from:", url)
         response = requests.get(url)
         md5_hash = hashlib.md5(response.content).hexdigest()
         df = pd.read_csv(BytesIO(response.content))
+        logger.info(df.select_dtypes(include=["int"]).columns)
         df["file_md5"] = md5_hash
         return df
     except HTTPError as e:
@@ -47,10 +47,12 @@ def generate_md5(row: pd.Series):
 )
 def get_github_csse_daily(start_date: date, end_date: date):
     partition_date = start_date
-    while partition_date <= end_date:
+    while partition_date < end_date:
         query_date = partition_date.strftime("%m-%d-%Y")
         url = f"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_daily_reports/{query_date}.csv"
+        logger.info(f"Downloading csv file from: {url}")
         df = _safe_download_covid_df_with_md5(url=url)
+        df = df.astype({col: "float" for col in df.select_dtypes(include=['int']).columns})
         df = df.reset_index(names="row_num")
         df["id"] = df.apply(generate_md5, axis=1)
         df["source_url"] = url
@@ -59,14 +61,11 @@ def get_github_csse_daily(start_date: date, end_date: date):
         df = _create_hive_partition_fields(df=df, ingest_date=partition_date)
         df["after_load_rows"] = df.shape[0]
         df["after_load_cols"] = str(list(df.columns))
-        df["updated_at"] = datetime.now(tz=UTC)
         yield df
         partition_date = partition_date + timedelta(days=1)
 
 
 @dlt.source
 def covid_github_source(start_date: Optional[date] = None, end_date: Optional[date] = None):
-    if start_date is None:
-        start_date = date.today()
-        end_date = date.today()
-    return get_github_csse_daily(start_date=start_date, end_date=end_date)
+    df = get_github_csse_daily(start_date=start_date, end_date=end_date)
+    return df

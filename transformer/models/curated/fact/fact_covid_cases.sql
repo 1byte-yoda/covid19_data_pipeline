@@ -1,3 +1,5 @@
+{{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+
 WITH covid_cases AS (
     SELECT
         cl.location_id
@@ -10,6 +12,10 @@ WITH covid_cases AS (
         ,t.last_update
     FROM {{ ref('cleansed_github_csse_daily') }} AS t
     INNER JOIN {{ ref('cleansed_location') }} AS cl ON t.id = cl.id
+    WHERE 1 = 1
+    {% if is_incremental() %}
+        AND t.last_update >= '{{ var('min_date') }}' AND t.last_update <= '{{ var('max_date') }}'
+    {% endif %}
 )
 
 ,covid_cases_with_date_id AS (

@@ -1,6 +1,8 @@
+{{ config(unique_key='row_key', incremental_strategy="delete+insert") }}
 WITH covid_datahub AS (
     SELECT
-        t.id
+        t.row_key
+        ,t.id
         ,t.date
         ,t.administrative_area_level
         ,COALESCE({{ standardize_country('country') }},'Unassigned') AS country
@@ -64,3 +66,8 @@ SELECT
     END AS combined_key
     ,* EXCLUDE (low_country,low_state,low_city,country,state,city)
 FROM covid_datahub
+WHERE
+1 = 1
+{% if is_incremental() %}
+    AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
+{% endif %}

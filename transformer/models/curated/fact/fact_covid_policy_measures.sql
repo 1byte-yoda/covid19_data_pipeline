@@ -1,3 +1,5 @@
+{{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+
 WITH covid_tests AS (
     SELECT DISTINCT
         location_id
@@ -17,12 +19,10 @@ WITH covid_tests AS (
         ,vaccination_policy
         ,elderly_people_protection
     FROM {{ ref('cleansed_covid_datahub') }}
--- WHERE COALESCE(
---     school_closing, workplace_closing, cancel_events, gatherings_restrictions,
---     transport_closing, stay_home_restrictions, international_movement_restrictions,
---     internal_movement_restrictions, information_campaigns, testing_policy,
---     contact_tracing, facial_coverings, vaccination_policy, elderly_people_protection
---     ) IS NOT NULL
+    WHERE 1 = 1
+    {% if is_incremental() %}
+        AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
+    {% endif %}
 )
 
 ,forward_filled AS (

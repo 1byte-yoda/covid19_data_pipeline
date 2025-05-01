@@ -10,4 +10,5 @@ SELECT
     ,lat
     ,longx
     ,load_date
+    ,last_update
 FROM {{ source('delta_source', 'github_csse_daily') }}

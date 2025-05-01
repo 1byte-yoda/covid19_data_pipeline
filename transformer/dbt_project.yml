@@ -20,12 +20,12 @@ models:
       +materialized: view
       +schema: raw
     cleansed:
-      +materialized: table
+      +materialized: incremental
       +schema: cleansed
     curated:
-      +materialized: table
+      +materialized: incremental
       +schema: curated
     marts:
-      +materialized: table
+      +materialized: incremental
       +schema: marts
     +pre-hook: "{{ create_minio_secret(secret) }}"

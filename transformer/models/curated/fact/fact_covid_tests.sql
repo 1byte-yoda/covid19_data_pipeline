@@ -1,3 +1,5 @@
+{{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+
 WITH covid_tests AS (
     SELECT DISTINCT
         t.location_id
@@ -7,6 +9,10 @@ WITH covid_tests AS (
         ,t.people_vaccinated
         ,t.people_fully_vaccinated
     FROM {{ ref('cleansed_covid_datahub') }} AS t
+    WHERE 1 = 1
+    {% if is_incremental() %}
+        AND t.date >= '{{ var('min_date') }}' AND t.date <= '{{ var('max_date') }}'
+    {% endif %}
 )
 
 ,max_values AS (

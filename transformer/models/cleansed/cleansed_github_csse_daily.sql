@@ -1,3 +1,4 @@
+{{ config(unique_key='id', incremental_strategy="delete+insert") }}
 WITH covid19 AS (
     SELECT
         id
@@ -17,7 +18,12 @@ WITH covid19 AS (
         ,month
         ,day
     FROM {{ ref('raw_github_csse_daily') }}
+
 )
 
 SELECT *
 FROM covid19
+WHERE 1 = 1
+{% if is_incremental() %}
+  AND last_update >= '{{ var('min_date') }}' AND last_update <= '{{ var('max_date') }}'
+{% endif %}

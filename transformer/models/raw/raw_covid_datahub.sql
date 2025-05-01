@@ -45,4 +45,5 @@ SELECT
     ,t.hosp
     ,t.icu
     ,t.vent
+    ,t.row_key
 FROM {{ source('delta_source', 'covid19datahub') }} AS t
