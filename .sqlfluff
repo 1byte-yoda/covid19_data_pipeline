@@ -47,8 +47,12 @@ dbt_var = {% macro var(variable, default='') %}item{% endmacro %}
 dbt_is_incremental = {% macro is_incremental() %}True{% endmacro %
 
 [sqlfluff:templater:dbt]
-project_dir = covid19_dbt
-profiles_dir = covid19_dbt
-profile = covid19_dbt
+project_dir = transformer
+profiles_dir = transformer
+profile = covid19
 target = dev
 dbt_skip_compilation_error = True
+
+[sqlfluff:templater:dbt:context]
+min_date = "2023-02-27"
+max_date = "2023-02-28"
