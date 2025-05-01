@@ -23,7 +23,8 @@ WITH covid19 AS (
 
 SELECT *
 FROM covid19
-WHERE 1 = 1
-{% if is_incremental() %}
-  AND last_update >= '{{ var('min_date') }}' AND last_update <= '{{ var('max_date') }}'
-{% endif %}
+WHERE
+    1 = 1
+    {% if is_incremental() %}
+        AND last_update >= '{{ var('min_date') }}' AND last_update <= '{{ var('max_date') }}'
+    {% endif %}

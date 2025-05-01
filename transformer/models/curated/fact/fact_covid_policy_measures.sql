@@ -19,10 +19,11 @@ WITH covid_tests AS (
         ,vaccination_policy
         ,elderly_people_protection
     FROM {{ ref('cleansed_covid_datahub') }}
-    WHERE 1 = 1
-    {% if is_incremental() %}
-        AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
-    {% endif %}
+    WHERE
+        1 = 1
+        {% if is_incremental() %}
+            AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
+        {% endif %}
 )
 
 ,forward_filled AS (

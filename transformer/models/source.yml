@@ -1,17 +1,18 @@
+---
 version: 2
 sources:
   - name: delta_source
     meta:
-      external_location: "delta_scan('{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/{name}')"
+      external_location: delta_scan('{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/{name}')
     tables:
       - name: github_csse_daily
         meta:
           dagster:
-            asset_key: [ "github_csse_daily" ]
+            asset_key: [github_csse_daily]
       - name: covid19datahub
         meta:
           dagster:
-            asset_key: [ "covid19datahub" ]
+            asset_key: [covid19datahub]
   - name: csv_source
     meta:
       external_location: "{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/google_geolocation/{name}.csv"

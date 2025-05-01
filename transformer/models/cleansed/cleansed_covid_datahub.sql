@@ -29,15 +29,15 @@ WITH covid_datahub AS (
         ,
 
         -- Index Policies
-        t.stringency_index
-        ,t.containment_health_index
-        ,t.economic_support_index
+        CASE WHEN t.stringency_index < 0 THEN t.stringency_index * -1 ELSE t.stringency_index END AS stringency_index
+        ,CASE WHEN t.containment_health_index < 0 THEN t.containment_health_index * -1 ELSE t.containment_health_index END AS containment_health_index
+        ,CASE WHEN t.economic_support_index < 0 THEN t.economic_support_index * -1 ELSE t.economic_support_index END AS economic_support_index
         ,
 
         -- Epidemiology
         t.confirmed
         ,t.deaths
-        ,t.recovered
+        ,CASE WHEN recovered < 0 THEN recovered * -1 ELSE recovered END AS recovered
         ,
 
         -- Tests
@@ -67,7 +67,7 @@ SELECT
     ,* EXCLUDE (low_country,low_state,low_city,country,state,city)
 FROM covid_datahub
 WHERE
-1 = 1
-{% if is_incremental() %}
-    AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
-{% endif %}
+    1 = 1
+    {% if is_incremental() %}
+        AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
+    {% endif %}
