@@ -1,3 +1,4 @@
+---
 covid19:
   target: dev
   outputs:
@@ -5,3 +6,12 @@ covid19:
       type: duckdb
       path: "{{ env_var('DUCKDB_FILE_PATH') }}"
       threads: 1
+      extensions: [httpfs, delta]
+      secrets:
+        - type: s3
+          provider: config
+          key_id: '{{ env_var("MINIO_ACCESS_KEY") }}'
+          secret: '{{ env_var("MINIO_SECRET_KEY") }}'
+          url_style: path
+          use_ssl: false
+          endpoint: '{{ env_var("MINIO_ENDPOINT_URL") }}'

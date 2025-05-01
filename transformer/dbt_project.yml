@@ -1,19 +1,14 @@
-name: 'covid19'
-version: '1.0.0'
-
-profile: 'covid19'
-
-model-paths: ["models"]
-analysis-paths: ["analyses"]
-test-paths: ["tests"]
-seed-paths: ["seeds"]
-macro-paths: ["macros"]
-snapshot-paths: ["snapshots"]
-
-clean-targets:
-  - "target"
-  - "dbt_packages"
-
+---
+name: covid19
+version: 1.0.0
+profile: covid19
+model-paths: [models]
+analysis-paths: [analyses]
+test-paths: [tests]
+seed-paths: [seeds]
+macro-paths: [macros]
+snapshot-paths: [snapshots]
+clean-targets: [target, dbt_packages]
 models:
   covid19:
     raw:
@@ -28,4 +23,3 @@ models:
     marts:
       +materialized: incremental
       +schema: marts
-    +pre-hook: "{{ create_minio_secret(secret) }}"
