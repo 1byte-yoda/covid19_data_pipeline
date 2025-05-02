@@ -1,6 +1,9 @@
 from dagster import Definitions
 from dagster_dbt import DbtCliResource
-from .assets import covid19_github_csse_assets, covid_datahub_assets, covid19_dbt_dbt_assets
+
+from .assets.covid_datahub import covid_datahub_assets
+from .assets.covid19_github_csse import covid19_github_csse_assets
+from .assets.dbt_core import covid19_dbt_dbt_assets
 from .project import covid19_dbt_project
 from .schedules import schedules
 

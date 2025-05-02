@@ -14,7 +14,8 @@ def get_project_root():
     return None
 
 
-covid19_dbt_project = DbtProject(
-    project_dir=Path(__file__).joinpath("..", "..", "..", "transformer").resolve()
-)
+DBT_PROJECT_DIR = get_project_root() / "transformer"
+
+
+covid19_dbt_project = DbtProject(project_dir=DBT_PROJECT_DIR)
 covid19_dbt_project.prepare_if_dev()

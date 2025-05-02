@@ -8,7 +8,9 @@ services:
     command: server --console-address ":9001" /data
     hostname: minio
     volumes: [./data/minio/data:/data]
-    ports: [9050:9000, 9051:9001]
+    ports:
+      - "9050:9000"
+      - "9051:9001"
   dbt:
     build:
       context: .
@@ -29,29 +31,15 @@ services:
     volumes:
       - ./data/duckdb:/data/duckdb
       - ./dagster_home:/dagster_home
-      - ./dagster:/dagster
+      - ./covid_pipeline:/covid_pipeline
       - ./transformer:/transformer
-    ports: [3000:3000]
+    ports:
+      - "3000:3000"
     depends_on:
       minio:
         condition: service_started
       dbt:
         condition: service_started
-#  jupyter:
-#    build:
-#      context: .
-#      dockerfile: ./docker/jupyter/Dockerfile
-#    container_name: jupyter
-#    env_file: .env
-#    volumes:
-#      - ./adhoc:/home/jovyan/work
-#      - ./data/duckdb:/home/jovyan/.duckdb
-#      - ./data/duckdb:/data/duckdb
-#    ports:
-#      - "8888:8888"
-#    depends_on:
-#      minio:
-#        condition: service_started
   superset:
     build:
       context: .
@@ -64,7 +52,8 @@ services:
         SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
     container_name: superset
     env_file: .env
-    ports: [8088:8088]
+    ports:
+      - "8088:8088"
     volumes:
       - ./data/duckdb:/app/superset_home/db
       - ./data/duckdb/stored_secrets:/home/superset/.duckdb/stored_secrets
