@@ -1,0 +1,7 @@
+sqlfluff==3.4.0
+sqlfluff-templater-dbt==3.4.0
+yamlfix==1.17.0
+black==25.1.0
+flake8==7.2.0
+pytest==8.3.5
+types-requests==2.32.0.20250328
