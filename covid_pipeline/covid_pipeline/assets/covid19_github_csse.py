@@ -13,6 +13,8 @@ from dagster_embedded_elt.dlt import DagsterDltResource, dlt_assets
 
 from . import CustomDagsterDltTranslator, daily_partitions
 
+_URL = "https://raw.githubusercontent.com/cssegisanddata/covid-19/refs/heads/master/csse_covid_19_data/csse_covid_19_daily_reports/{query_date}.csv"
+
 
 @dlt.resource(
     name="github_csse_daily",
@@ -22,14 +24,14 @@ from . import CustomDagsterDltTranslator, daily_partitions
     primary_key="id",
     write_disposition={"disposition": "merge", "strategy": "upsert"},
 )
-def get_github_csse_daily(start_date: date, end_date: date):
+def get_github_csse_daily(start_date: date, end_date: date, url: str = _URL):
     while start_date < end_date:
         query_date = start_date.strftime("%m-%d-%Y")
 
-        url = f"https://raw.githubusercontent.com/CSSEGISandData/COVID-19/refs/heads/master/csse_covid_19_data/csse_covid_19_daily_reports/{query_date}.csv"
-        logger.info(f"Downloading csv file from: {url}")
+        download_url = url.format(query_date=query_date)
+        logger.info(f"Downloading csv file from: {download_url}")
 
-        df = _safe_download_with_md5_and_url(url=url)
+        df = _safe_download_with_md5_and_url(url=download_url)
 
         # Converting Integer Fields to Float which will allow pyarrow to concatenate dataframes.
         # Ints can be Floats but not the other way around
@@ -54,7 +56,7 @@ def covid_github_source(start_date: Optional[date] = None, end_date: Optional[da
     dagster_dlt_translator=CustomDagsterDltTranslator(),
 )
 def covid19_github_csse_assets(context: AssetExecutionContext, dagster_dlt: DagsterDltResource):
-    start, end = context.partition_time_window
+    start, end = context.partition_key_range
     yield from dagster_dlt.run(context=context, dlt_source=covid_github_source(start_date=start, end_date=end))
 
 
