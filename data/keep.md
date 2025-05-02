@@ -1,0 +1,1 @@
+Docker Folder For MinIO Data
