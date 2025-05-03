@@ -32,7 +32,7 @@ yaml_fmt:
 # Format Python Code using Black - PEP8 standard
 .PHONY: black
 black:
-	black -l 170 $(PY_FOLDERS)
+	black -l 200 $(PY_FOLDERS)
 
 # Check for any Python Lints
 .PHONY: flake8
