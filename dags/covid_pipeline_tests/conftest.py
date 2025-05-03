@@ -4,35 +4,40 @@ from io import BytesIO
 import numpy as np
 import pandas as pd
 import pytest
-from deltalake import DeltaTable, write_deltalake
+from dagster import PartitionKeyRange, TableSchema
+from deltalake import write_deltalake
+
+from dags.covid_pipeline.assets.schemas import Covid19CsseGithub
+
+np.random.seed(50)
 
 
-def make_df(query_date: str) -> pd.DataFrame:
-    dt = datetime.strptime(query_date, "%Y-%m-%d")
-    n_rows = 5
-    df = pd.DataFrame(
-        {
-            "fips": [1009] * n_rows,
-            "admin2": np.random.choice(["Barbour"], n_rows),
-            "province_state": np.random.choice(["Alabama"], n_rows),
-            "country_region": ["US"] * n_rows,
-            "last_update": [dt.isoformat()] * n_rows,
-            "lat": [139.55] * n_rows,
-            "longx": [-20.8] * n_rows,
-            "confirmed": [100000] * n_rows,
-            "deaths": [20] * n_rows,
-            "recovered": [50000] * n_rows,
-            "active": [49950] * n_rows,
-            "combined_key": [f"County{i}, State" for i in range(n_rows)],
-            "incident_rate": [20] * n_rows,
-            "case_fatality_ratio": [5] * n_rows,
-        }
-    )
+def generate_dataframe_from_table_schema(schema: TableSchema, load_date: datetime, num_rows: int = 5) -> pd.DataFrame:
+    type_mapping = {
+        "bigint": lambda: np.array([10000] * num_rows, dtype=np.int64),
+        "int": lambda: np.array([200] * num_rows, dtype=np.int32),
+        "double": lambda: np.round(np.array([500.25] * num_rows, dtype=np.double), 2),
+        "text": lambda: [f"sample_{i}" for i in range(num_rows)],
+        "timestamp": lambda: pd.Timestamp(load_date)
+    }
+
+    data = {}
+    for column in schema.columns:
+        if "primary_key" in column.constraints.other:
+            data[column.name] = [f"{str(i)}_{load_date}" for i in range(num_rows)]
+        else:
+            generator = type_mapping.get(column.type, lambda: [None] * num_rows)
+            data[column.name] = generator()
+
+    df = pd.DataFrame(data)
+
     return df
 
 
 def make_csv(query_date: str) -> bytes:
-    df = make_df(query_date=query_date)
+    df = generate_dataframe_from_table_schema(load_date=datetime.strptime(query_date, "%Y-%m-%d"), schema=Covid19CsseGithub.dagster_table_schema())
+    df = df.drop("row_num", axis=1)
+    df["load_date"] = pd.Timestamp(query_date)
     csv_buffer = BytesIO()
     csv_buffer.seek(0)
     df.to_csv(csv_buffer, index=False)  # noqa
@@ -41,16 +46,17 @@ def make_csv(query_date: str) -> bytes:
 
 @pytest.fixture
 def mock_delta_table(tmp_path_factory):
-    def query(start_date: datetime, end_date: datetime) -> str:
+    def query(partition_key_range: PartitionKeyRange, schema: TableSchema) -> str:
+        start_date, end_date = partition_key_range
         tmp_dir = tmp_path_factory.mktemp("s3")
         fake_s3_bucket_url = f"file://{tmp_dir}/covid19/covid19datahub"
+
         while start_date < end_date:
-            df = make_df(query_date=start_date.strftime("%Y-%m-%d"))
+            df = generate_dataframe_from_table_schema(schema=schema, load_date=start_date)
             df["year"] = start_date.year
             df["month"] = start_date.month
             df["day"] = start_date.day
-            df["date"] = start_date.date()
-            df = df.reset_index(names="id")
+            df["date"] = datetime.strftime(start_date, "%Y-%m-%d")
 
             write_deltalake(fake_s3_bucket_url, data=df, partition_by=["year", "month", "day"], mode="append")
             start_date = start_date + timedelta(days=1)

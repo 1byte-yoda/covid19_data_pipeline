@@ -11,7 +11,8 @@ from urllib.error import HTTPError
 from dagster import AssetExecutionContext
 from dagster_embedded_elt.dlt import DagsterDltResource, dlt_assets
 
-from . import CustomDagsterDltTranslator, daily_partitions
+from dags.covid_pipeline.assets import CustomDagsterDltTranslator, daily_partitions
+from dags.covid_pipeline.assets.schemas import Covid19CsseGithub
 
 _URL = "https://raw.githubusercontent.com/cssegisanddata/covid-19/refs/heads/master/csse_covid_19_data/csse_covid_19_daily_reports/{query_date}.csv"
 
@@ -61,18 +62,24 @@ def covid19_github_csse_assets(context: AssetExecutionContext, dagster_dlt: Dags
 
 
 def _safe_download_with_md5_and_url(url: str) -> pd.DataFrame:
+    columns_dtypes = Covid19CsseGithub.pandas_schema()
+
     try:
         response = requests.get(url)
 
         df = pd.read_csv(BytesIO(response.content))
         df["file_md5"] = hashlib.md5(response.content).hexdigest()
         df["source_url"] = url
+        df = df.astype({col: dtype for col, dtype in columns_dtypes.items() if col in df.columns})
 
         return df
 
     except HTTPError as e:
         logger.exception(e)
-        return pd.DataFrame()
+
+        # Create empty DataFrame with specified dtypes
+        df = pd.DataFrame({col: pd.Series(dtype=dtype) for col, dtype in columns_dtypes.items()})
+        return df
 
 
 def _create_hive_partition_fields(df: pd.DataFrame, ingest_date: date) -> pd.DataFrame:
