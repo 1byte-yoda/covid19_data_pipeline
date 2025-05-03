@@ -10,7 +10,7 @@ ADD ./requirements.txt .
 
 RUN uv pip install --system -r requirements.txt
 
-WORKDIR /dagster
+WORKDIR /dags
 
 ADD ./docker/dagster/entrypoint.sh /docker/dagster/entrypoint.sh
 RUN chmod +x /docker/dagster/entrypoint.sh

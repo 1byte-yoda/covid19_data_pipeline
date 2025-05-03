@@ -31,7 +31,7 @@ services:
     volumes:
       - ./data/duckdb:/data/duckdb
       - ./dagster_home:/dagster_home
-      - ./covid_pipeline:/covid_pipeline
+      - ./dags:/dags
       - ./transformer:/transformer
     ports:
       - "3000:3000"
