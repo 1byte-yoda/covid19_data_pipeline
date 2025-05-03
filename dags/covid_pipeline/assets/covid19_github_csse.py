@@ -30,7 +30,7 @@ def get_github_csse_daily(start_date: date, end_date: date, url: str = _URL):
         query_date = start_date.strftime("%m-%d-%Y")
 
         download_url = url.format(query_date=query_date)
-        logger.info(f"Downloading csv file from: {download_url}")
+        logger.debug(f"Downloading csv file from: {download_url}")
 
         df = _safe_download_with_md5_and_url(url=download_url)
 
