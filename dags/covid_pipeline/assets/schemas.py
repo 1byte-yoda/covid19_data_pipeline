@@ -47,7 +47,7 @@ class Covid19DataHub:
                 TableColumn(name="row_key", type="text", description=None, constraints=TableColumnConstraints(nullable=False, unique=False, other=["primary_key"]), tags={}),
                 TableColumn(name="id", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
                 TableColumn(name="date", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-                TableColumn(name="administrative_area_level", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
+                TableColumn(name="administrative_area_level", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
                 TableColumn(name="country", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
                 TableColumn(name="state", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
                 TableColumn(name="city", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
@@ -91,80 +91,6 @@ class Covid19DataHub:
         return convert_to_pandas_dtypes(table_schema=cls.dagster_table_schema())
 
 
-#
-# def covid19datahub() -> dict[str, str]:
-#     columns = {
-#         "row_num": "int64",
-#         "row_key": "string",
-#         "id": "string",
-#         "date": "string",
-#         "administrative_area_level": "int64",
-#         "country": "string",
-#         "state": "string",
-#         "city": "string",
-#         "population": "float64",
-#         "school_closing": "float64",
-#         "workplace_closing": "float64",
-#         "cancel_events": "float64",
-#         "gatherings_restrictions": "float64",
-#         "transport_closing": "float64",
-#         "stay_home_restrictions": "float64",
-#         "internal_movement_restrictions": "float64",
-#         "international_movement_restrictions": "float64",
-#         "information_campaigns": "float64",
-#         "testing_policy": "float64",
-#         "contact_tracing": "float64",
-#         "facial_coverings": "float64",
-#         "vaccination_policy": "float64",
-#         "elderly_people_protection": "float64",
-#         "stringency_index": "float64",
-#         "containment_health_index": "float64",
-#         "economic_support_index": "float64",
-#         "confirmed": "float64",
-#         "deaths": "float64",
-#         "recovered": "float64",
-#         "tests": "float64",
-#         "vaccines": "float64",
-#         "people_vaccinated": "float64",
-#         "people_fully_vaccinated": "float64",
-#         "hosp": "float64",
-#         "icu": "float64",
-#         "vent": "float64",
-#         "year": "int32",
-#         "month": "int32",
-#         "day": "int32"
-#     }
-#     return columns
-#
-#
-# def covid19_github_csse() -> dict[str, str]:
-#     columns = {
-#         "row_num": "Int64",
-#         "fips": "float64",
-#         "admin2": "string",
-#         "province_state": "string",
-#         "country_region": "string",
-#         "last_update": "string",
-#         "lat": "float64",
-#         "longx": "float64",
-#         "confirmed": "float64",
-#         "deaths": "float64",
-#         "recovered": "float64",
-#         "active": "float64",
-#         "combined_key": "string",
-#         "incident_rate": "float64",
-#         "case_fatality_ratio": "float64",
-#         "file_md5": "string",
-#         "source_url": "string",
-#         "id": "string",
-#         "load_date": "datetime64[ns, UTC]",
-#         "year": "Int64",
-#         "month": "Int64",
-#         "day": "Int64"
-#     }
-#     return columns
-
-
 def convert_to_pandas_dtypes(table_schema: TableSchema):
     type_mapping = {
         "bigint": "int64",
@@ -181,31 +107,3 @@ def convert_to_pandas_dtypes(table_schema: TableSchema):
         pandas_dtypes[col_name] = pandas_dtype
 
     return pandas_dtypes
-
-
-TableSchema(
-    columns=[
-        TableColumn(name="id", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="fips", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="admin2", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="province_state", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="country_region", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="last_update", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="lat", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="longx", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="confirmed", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="deaths", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="recovered", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="active", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="combined_key", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="incident_rate", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="case_fatality_ratio", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="year", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=["partition"]), tags={}),
-        TableColumn(name="month", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=["partition"]), tags={}),
-        TableColumn(name="day", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=["partition"]), tags={}),
-        TableColumn(name="date", type="date", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="row_num", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-        TableColumn(name="row_key", type="text", description=None, constraints=TableColumnConstraints(nullable=False, unique=False, other=["primary_key"]), tags={}),
-    ],
-    constraints=TableConstraints(other=[]),
-)
