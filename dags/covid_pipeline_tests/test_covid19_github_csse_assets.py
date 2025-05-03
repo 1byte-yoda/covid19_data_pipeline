@@ -15,14 +15,15 @@ from dags.covid_pipeline_tests.conftest import mocked_requests_get
 def test_covid_github_csse_csv_asset_schema_is_correctly_materialized(_, tmp_path_factory):
     # GIVEN - Covid19CsseGithub data for 2023-02-16
     tmp_dir = str(tmp_path_factory.mktemp("data"))
-    context = build_asset_context(partition_key_range=PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 17)))  # noqa
+    partition_key_range = PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 17))  # noqa
+    context = build_asset_context(partition_key_range=partition_key_range)
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
 
     # WHEN - DLT Pipeline Ingest Data from patched mocked_requests_get
     result = covid19_github_csse_assets(context=context, dagster_dlt=DagsterDltResource())
     materialized_asset = next(result)  # noqa
 
-    # THEN
+    # THEN Schema Metadata Must Match
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/github_csse_daily").to_pandas()
     covid19_github_schema = Covid19CsseGithub.dagster_table_schema()
 
@@ -40,8 +41,9 @@ def test_covid_github_csse_csv_asset_is_idempotent(_, tmp_path_factory):
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
 
     # WHEN - Run the dlt ingester twice with the same partition/date key
+    partition_key_range = PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 17))  # noqa
     for _ in range(2):
-        context = build_asset_context(partition_key_range=PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 17)))  # noqa
+        context = build_asset_context(partition_key_range=partition_key_range)  # noqa
         result = covid19_github_csse_assets(context=context, dagster_dlt=DagsterDltResource())
         _ = next(result)  # noqa
 
@@ -59,13 +61,12 @@ def test_github_covid_csv_asset_download_with_range_key(_, tmp_path_factory):
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
 
     # WHEN - Run the dlt ingester with the ranged partition/date key
-    context = build_asset_context(
-        partition_key_range=PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 18))  # noqa
-    )
+    partition_key_range = PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 18))  # noqa
+    context = build_asset_context(partition_key_range=partition_key_range)
     result = covid19_github_csse_assets(context=context, dagster_dlt=DagsterDltResource())
     _ = next(result)  # noqa
 
-    # THEN - Data for 20203-02-16 and 2023-02-17 Must Be Inserted to the Delta Table without duplicates
+    # THEN - Data for 2023-02-16 and 2023-02-17 Must Be Inserted to the Delta Table without duplicates
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/github_csse_daily").to_pandas()
 
     assert len(df) == 10

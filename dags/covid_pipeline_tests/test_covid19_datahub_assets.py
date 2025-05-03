@@ -1,6 +1,5 @@
 import os
-from datetime import datetime, date
-from unittest.mock import patch
+from datetime import datetime
 
 import dagster as dg
 from dagster import AssetKey, PartitionKeyRange
@@ -9,7 +8,6 @@ from deltalake import DeltaTable
 
 from dags.covid_pipeline.assets.covid_datahub import covid_datahub_assets
 from dags.covid_pipeline.assets.schemas import Covid19DataHub
-from dags.covid_pipeline_tests.conftest import mock_delta_table
 
 
 def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, mock_delta_table):
@@ -22,7 +20,7 @@ def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, 
     covid19datahub_schema = Covid19DataHub.dagster_table_schema()
     s3_bucket_url = mock_delta_table(partition_key_range=partition_key_range, schema=covid19datahub_schema)
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
-    os.environ["COVID_DATAHUB_S3_BUCKET"]  = s3_bucket_url
+    os.environ["COVID_DATAHUB_S3_BUCKET"] = s3_bucket_url
 
     # WHEN - DLT Pipeline Ingest Data from COVID_DATAHUB_S3_BUCKET
     result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
@@ -30,7 +28,7 @@ def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, 
 
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
 
-    # THEN
+    # THEN Schema Metadata Must Match
     assert materialized_asset.asset_key == AssetKey("covid19datahub")
     assert materialized_asset.metadata["dataset_name"] == "covid19"
     assert materialized_asset.metadata["dagster/column_schema"] == covid19datahub_schema
@@ -46,7 +44,7 @@ def test_covid19_delta_csv_asset_is_idempotent(tmp_path_factory, mock_delta_tabl
     # -- Patch below with local storage for testing
     tmp_dir = str(tmp_path_factory.mktemp("data"))
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
-    os.environ["COVID_DATAHUB_S3_BUCKET"]  = s3_bucket_url
+    os.environ["COVID_DATAHUB_S3_BUCKET"] = s3_bucket_url
 
     # WHEN - DLT Pipeline Ingest The Exact Same Data Twice from COVID_DATAHUB_S3_BUCKET
     for _ in range(2):
@@ -54,7 +52,7 @@ def test_covid19_delta_csv_asset_is_idempotent(tmp_path_factory, mock_delta_tabl
         result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
         materialized_asset = next(result)  # noqa
 
-    # THEN
+    # THEN Data Must Be Merged into the Delta Table without duplicates
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
 
     assert len(df) == 5
@@ -68,7 +66,7 @@ def test_covid19_asset_download_with_range_key(tmp_path_factory, mock_delta_tabl
 
     tmp_dir = str(tmp_path_factory.mktemp("data"))
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
-    os.environ["COVID_DATAHUB_S3_BUCKET"]  = s3_bucket_url
+    os.environ["COVID_DATAHUB_S3_BUCKET"] = s3_bucket_url
 
     # WHEN - DLT Pipeline Ingest Data from COVID_DATAHUB_S3_BUCKET
     context: dg.AssetExecutionContext = dg.build_asset_context(partition_key_range=partition_key_range)

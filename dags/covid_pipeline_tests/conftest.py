@@ -18,7 +18,7 @@ def generate_dataframe_from_table_schema(schema: TableSchema, load_date: datetim
         "int": lambda: np.array([200] * num_rows, dtype=np.int32),
         "double": lambda: np.round(np.array([500.25] * num_rows, dtype=np.double), 2),
         "text": lambda: [f"sample_{i}" for i in range(num_rows)],
-        "timestamp": lambda: pd.Timestamp(load_date)
+        "timestamp": lambda: pd.Timestamp(load_date),
     }
 
     data = {}
@@ -61,8 +61,8 @@ def mock_delta_table(tmp_path_factory):
             write_deltalake(fake_s3_bucket_url, data=df, partition_by=["year", "month", "day"], mode="append")
             start_date = start_date + timedelta(days=1)
         return fake_s3_bucket_url
-    return query
 
+    return query
 
 
 def mocked_requests_get(*args, **kwargs):

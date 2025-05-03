@@ -3,8 +3,8 @@ export
 
 DUCKDB_FILE_PATH := ..$(DUCKDB_FILE_PATH)
 DBT_FOLDER := transformer
-FOLDERS_WITH_YML := covid_pipeline transformer dagster_home docker-compose.yaml
-PY_FOLDERS := covid_pipeline
+FOLDERS_WITH_YML := dags transformer dagster_home docker-compose.yaml
+PY_FOLDERS := dags
 
 .PHONY: dbt_lint dbt_fmt dbt_test yaml_fmt black flake8 typehint checklist pytest
 
@@ -47,7 +47,7 @@ typehint:
 # Run Dagster Asset Unit Tests
 .PHONY: pytest
 pytest:
-	pytest covid_pipeline/covid_pipeline_tests -v -s
+	pytest $(PY_FOLDERS)/covid_pipeline_tests -v -s
 
 # Run Checklist for Continuous Integration and Deployment
 .PHONY: checklist
