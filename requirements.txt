@@ -7,7 +7,7 @@ deltalake==0.25.5
 dlt[filesystem]==1.10.0
 dlt[deltalake]==1.10.0
 pyarrow==17.0.0
-dagster-embedded-elt==0.26.12
+git+https://github.com/1byte-yoda/dagster.git@mark/schema-updates#egg=dagster&subdirectory=python_modules/libraries/dagster-dlt
 dbt-core==1.9.4
 dbt-duckdb==1.9.3
 dagster-duckdb==0.26.12
