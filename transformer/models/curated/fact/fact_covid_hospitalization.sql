@@ -3,7 +3,7 @@
 WITH covid_hosp AS (
     SELECT DISTINCT
         t.location_id
-        ,strftime(t.date,'%Y%m%d')::INT AS date_id
+        ,strftime(t.date::DATE,'%Y%m%d')::INT AS date_id
         ,t.hosp
         ,t.icu
         ,t.vent

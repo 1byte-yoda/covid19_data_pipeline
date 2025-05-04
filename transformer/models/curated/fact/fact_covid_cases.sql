@@ -28,7 +28,7 @@ WITH covid_cases AS (
         ,t.active
         ,t.incident_rate
         ,t.case_fatality_ratio
-        ,strftime(t.last_update,'%Y%m%d')::INT AS date_id
+        ,strftime(t.last_update::DATE,'%Y%m%d')::INT AS date_id
     FROM covid_cases AS t
 )
 

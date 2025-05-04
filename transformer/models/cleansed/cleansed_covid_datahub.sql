@@ -3,7 +3,7 @@ WITH covid_datahub AS (
     SELECT
         t.row_key
         ,t.id
-        ,t.date
+        ,COALESCE(t.date, '1900-01-01')::DATE AS date
         ,t.administrative_area_level
         ,COALESCE({{ standardize_country('country') }},'Unassigned') AS country
         ,COALESCE({{ standardize_state('state') }},'Unassigned') AS state

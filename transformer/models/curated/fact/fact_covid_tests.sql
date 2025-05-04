@@ -3,7 +3,7 @@
 WITH covid_tests AS (
     SELECT DISTINCT
         t.location_id
-        ,strftime(t.date,'%Y%m%d')::INT AS date_id
+        ,strftime(t.date::DATE,'%Y%m%d')::INT AS date_id
         ,t.tests
         ,t.vaccines
         ,t.people_vaccinated

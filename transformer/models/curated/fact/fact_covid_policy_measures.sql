@@ -3,7 +3,7 @@
 WITH covid_tests AS (
     SELECT DISTINCT
         location_id
-        ,strftime(date,'%Y%m%d')::INT AS date_id
+        ,strftime(date::DATE,'%Y%m%d')::INT AS date_id
         ,school_closing
         ,workplace_closing
         ,cancel_events
