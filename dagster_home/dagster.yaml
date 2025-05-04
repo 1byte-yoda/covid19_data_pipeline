@@ -1,4 +1,3 @@
----
 run_coordinator:
   module: dagster.core.run_coordinator
   class: QueuedRunCoordinator
@@ -8,3 +7,12 @@ run_coordinator:
       - key: dagster/backfill
         value: 'true'
         limit: 2
+
+storage:
+  postgres:
+   postgres_db:
+     hostname: postgres
+     username: dagster
+     password: dagster
+     db_name: dagster
+     port: 5432

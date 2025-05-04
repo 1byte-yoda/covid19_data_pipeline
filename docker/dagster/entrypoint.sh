@@ -1,5 +1,5 @@
 #!/bin/bash
 
 
-cd /covid_pipeline
+cd /dags
 exec dagster dev -h 0.0.0.0

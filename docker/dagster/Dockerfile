@@ -2,7 +2,19 @@ FROM python:3.11-slim
 
 RUN apt-get update
 
-RUN apt-get install -y --no-install-recommends curl
+RUN apt-get install -y --no-install-recommends curl \
+    git \
+    bash \
+    unzip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -O https://dl.min.io/client/mc/release/linux-amd64/mc && \
+    chmod +x mc && mv mc /usr/local/bin/mc
+
+COPY ./docker/dagster/init_assets.sh /init_assets.sh
+
+RUN chmod +x /init_assets.sh
 
 RUN pip install uv
 
