@@ -1,32 +1,32 @@
 import hashlib
 from io import BytesIO
 from typing import Optional
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 import dlt
 import requests
 import pandas as pd
 from loguru import logger
 from urllib.error import HTTPError
+from dagster_dlt import DagsterDltResource, dlt_assets
 from dagster import AssetExecutionContext
-from dagster_embedded_elt.dlt import DagsterDltResource, dlt_assets
+from dlt.common.runtime.slack import send_slack_message
 
-from dags.covid_pipeline.assets import CustomDagsterDltTranslator, daily_partitions
-from dags.covid_pipeline.assets.schemas import Covid19CsseGithub
-
-_URL = "https://raw.githubusercontent.com/cssegisanddata/covid-19/refs/heads/master/csse_covid_19_data/csse_covid_19_daily_reports/{query_date}.csv"
+from . import CustomDagsterDltTranslator, daily_partitions
+from .schemas import Covid19CsseGithub, add_schema_evolution_metadata
+from ..constants import SLACK_HOOK, GITHUB_COVID_URL
 
 
 @dlt.resource(
     name="github_csse_daily",
     table_format="delta",
     table_name="github_csse_daily",
-    columns={"year": {"partition": True}, "month": {"partition": True}, "day": {"partition": True}},
+    columns=Covid19CsseGithub.dlt_schema(),
     primary_key="id",
     write_disposition={"disposition": "merge", "strategy": "upsert"},
 )
-def get_github_csse_daily(start_date: date, end_date: date, url: str = _URL):
-    while start_date < end_date:
+def get_github_csse_daily(start_date: date, end_date: date, url: str = GITHUB_COVID_URL):
+    while start_date <= end_date:
         query_date = start_date.strftime("%m-%d-%Y")
 
         download_url = url.format(query_date=query_date)
@@ -54,11 +54,28 @@ def covid_github_source(start_date: Optional[date] = None, end_date: Optional[da
     dlt_source=covid_github_source(),
     dlt_pipeline=dlt.pipeline(pipeline_name="github_csse_daily", destination=dlt.destinations.filesystem(), dataset_name="covid19"),
     partitions_def=daily_partitions,
-    dagster_dlt_translator=CustomDagsterDltTranslator(),
+    dagster_dlt_translator=CustomDagsterDltTranslator()
 )
 def covid19_github_csse_assets(context: AssetExecutionContext, dagster_dlt: DagsterDltResource):
     start, end = context.partition_key_range
-    yield from dagster_dlt.run(context=context, dlt_source=covid_github_source(start_date=start, end_date=end))
+
+    materialized_assets = dagster_dlt.run(
+        context=context, dlt_source=covid_github_source(
+            start_date=datetime.strptime(start, '%Y-%m-%d'),
+            end_date=datetime.strptime(end, "%Y-%m-%d")
+        )
+    )
+
+    schema_name = materialized_assets._dlt_pipeline.default_schema_name  # noqa
+
+    for asset in materialized_assets:
+        schema_hash = asset.metadata.get("schema_hash")
+        md_content = add_schema_evolution_metadata(context=context, asset=asset, schema_hash=schema_hash, dlt_schema=schema_name)
+
+        if SLACK_HOOK and md_content:
+            send_slack_message(SLACK_HOOK, message=md_content)
+
+        yield asset
 
 
 def _safe_download_with_md5_and_url(url: str) -> pd.DataFrame:
@@ -71,13 +88,12 @@ def _safe_download_with_md5_and_url(url: str) -> pd.DataFrame:
         df["file_md5"] = hashlib.md5(response.content).hexdigest()
         df["source_url"] = url
         df = df.astype({col: dtype for col, dtype in columns_dtypes.items() if col in df.columns})
-
         return df
 
     except HTTPError as e:
         logger.exception(e)
 
-        # Create empty DataFrame with specified dtypes
+        # Create empty DataFrame with explicit dtypes
         df = pd.DataFrame({col: pd.Series(dtype=dtype) for col, dtype in columns_dtypes.items()})
         return df
 

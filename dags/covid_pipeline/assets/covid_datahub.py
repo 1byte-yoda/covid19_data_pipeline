@@ -1,17 +1,19 @@
 import hashlib
 import os
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from typing import Optional, Iterable
 
 import dlt
 import pandas as pd
 from deltalake import DeltaTable
+from dlt.common.runtime.slack import send_slack_message
 from loguru import logger
 from dagster import AssetExecutionContext
-from dagster_embedded_elt.dlt import DagsterDltResource, dlt_assets
+from dagster_dlt import DagsterDltResource, dlt_assets
 
 from . import CustomDagsterDltTranslator, daily_partitions
-from .schemas import Covid19DataHub
+from .schemas import Covid19DataHub, add_schema_evolution_metadata
+from ..constants import SLACK_HOOK
 
 _STORAGE_OPTIONS = {"AWS_REGION": "ap-southeast-1", "skip_signature": "true"}
 
@@ -20,12 +22,12 @@ _STORAGE_OPTIONS = {"AWS_REGION": "ap-southeast-1", "skip_signature": "true"}
     name="covid19datahub",
     table_format="delta",
     table_name="covid19datahub",
-    columns={"year": {"partition": True}, "month": {"partition": True}, "day": {"partition": True}},  # explicitly defining column partitions
+    columns=Covid19DataHub.dlt_schema(),
     primary_key=["row_key"],
     write_disposition={"disposition": "merge", "strategy": "upsert"},
 )
 def get_covid_datahub(start_date: date, end_date: date, s3_bucket_path: str) -> Iterable[pd.DataFrame]:
-    while start_date < end_date:
+    while start_date <= end_date:
         logger.debug(f"Downloading data for partition {start_date}...")
 
         partitions = _get_hive_partition_filter(dt=start_date)
@@ -54,11 +56,24 @@ def covid_datahub_source(start_date: Optional[date] = None, end_date: Optional[d
         dataset_name="covid19",
     ),
     dagster_dlt_translator=CustomDagsterDltTranslator(),
-    partitions_def=daily_partitions,
+    partitions_def=daily_partitions
 )
 def covid_datahub_assets(context: AssetExecutionContext, dagster_dlt: DagsterDltResource):
     start, end = context.partition_key_range
-    yield from dagster_dlt.run(context=context, dlt_source=covid_datahub_source(start_date=start, end_date=end))
+    start_date = datetime.strptime(start, '%Y-%m-%d')
+    end_date = datetime.strptime(end, "%Y-%m-%d")
+    materialized_assets = dagster_dlt.run(context=context, dlt_source=covid_datahub_source(start_date=start_date, end_date=end_date))
+
+    schema_name = materialized_assets._dlt_pipeline.default_schema_name  # noqa
+
+    for asset in materialized_assets:
+        schema_hash = asset.metadata.get("schema_hash")
+        md_content = add_schema_evolution_metadata(context=context, asset=asset, schema_hash=schema_hash, dlt_schema=schema_name)
+
+        if SLACK_HOOK and md_content:
+            send_slack_message(SLACK_HOOK, message=md_content)
+
+        yield asset
 
 
 def _safe_download_from_s3(s3_bucket_path: str, partitions: list[tuple[str, str, str]]) -> pd.DataFrame:
