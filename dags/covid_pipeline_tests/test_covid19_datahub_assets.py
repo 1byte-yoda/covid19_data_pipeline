@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import dagster as dg
 from dagster import AssetKey, PartitionKeyRange
@@ -12,7 +11,7 @@ from dags.covid_pipeline.assets.schemas import Covid19DataHub
 
 def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, mock_delta_table):
     # GIVEN - Covid19DataHub data for 2023-02-01
-    partition_key_range = PartitionKeyRange(datetime(2023, 2, 1), datetime(2023, 2, 2))  # noqa
+    partition_key_range = PartitionKeyRange("2023-02-01", "2023-02-01")
     context = dg.build_asset_context(partition_key_range=partition_key_range)
     tmp_dir = str(tmp_path_factory.mktemp("data"))
 
@@ -38,7 +37,7 @@ def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, 
 
 def test_covid19_delta_csv_asset_is_idempotent(tmp_path_factory, mock_delta_table):
     # GIVEN - Covid19DataHub data for 2023-02-01
-    partition_key_range = PartitionKeyRange(datetime(2023, 2, 1), datetime(2023, 2, 2))  # noqa
+    partition_key_range = PartitionKeyRange("2023-02-01", "2023-02-01")
     s3_bucket_url = mock_delta_table(partition_key_range=partition_key_range, schema=Covid19DataHub.dagster_table_schema())
 
     # -- Patch below with local storage for testing
@@ -61,7 +60,7 @@ def test_covid19_delta_csv_asset_is_idempotent(tmp_path_factory, mock_delta_tabl
 
 def test_covid19_asset_download_with_range_key(tmp_path_factory, mock_delta_table):
     # GIVEN - Covid19DataHub Ranged Data from 2023-02-01 to 20203-02-03
-    partition_key_range = PartitionKeyRange(datetime(2023, 2, 1), datetime(2023, 2, 4))  # noqa
+    partition_key_range = PartitionKeyRange("2023-02-01", "2023-02-03")
     s3_bucket_url = mock_delta_table(partition_key_range, schema=Covid19DataHub.dagster_table_schema())
 
     tmp_dir = str(tmp_path_factory.mktemp("data"))
@@ -73,7 +72,7 @@ def test_covid19_asset_download_with_range_key(tmp_path_factory, mock_delta_tabl
     result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
     _ = next(result)  # noqa
 
-    # THEN - Data for 20203-02-16 and 2023-02-17 Must Be Inserted to the Delta Table without duplicates
+    # THEN - Data for 20203-02-01 and 2023-02-03 Must Be Inserted to the Delta Table without duplicates
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
 
     assert len(df) == 15

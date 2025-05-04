@@ -15,8 +15,7 @@ from dags.covid_pipeline_tests.conftest import mocked_requests_get
 def test_covid_github_csse_csv_asset_schema_is_correctly_materialized(_, tmp_path_factory):
     # GIVEN - Covid19CsseGithub data for 2023-02-16
     tmp_dir = str(tmp_path_factory.mktemp("data"))
-    partition_key_range = PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 17))  # noqa
-    context = build_asset_context(partition_key_range=partition_key_range)
+    context = build_asset_context(partition_key="2023-02-16")
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
 
     # WHEN - DLT Pipeline Ingest Data from patched mocked_requests_get
@@ -41,9 +40,8 @@ def test_covid_github_csse_csv_asset_is_idempotent(_, tmp_path_factory):
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
 
     # WHEN - Run the dlt ingester twice with the same partition/date key
-    partition_key_range = PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 17))  # noqa
     for _ in range(2):
-        context = build_asset_context(partition_key_range=partition_key_range)  # noqa
+        context = build_asset_context(partition_key="2023-02-16")  # noqa
         result = covid19_github_csse_assets(context=context, dagster_dlt=DagsterDltResource())
         _ = next(result)  # noqa
 
@@ -61,7 +59,7 @@ def test_github_covid_csv_asset_download_with_range_key(_, tmp_path_factory):
     os.environ["DESTINATION__FILESYSTEM__BUCKET_URL"] = tmp_dir
 
     # WHEN - Run the dlt ingester with the ranged partition/date key
-    partition_key_range = PartitionKeyRange(datetime(2023, 2, 16), datetime(2023, 2, 18))  # noqa
+    partition_key_range = PartitionKeyRange("2023-02-16", "2023-02-17")
     context = build_asset_context(partition_key_range=partition_key_range)
     result = covid19_github_csse_assets(context=context, dagster_dlt=DagsterDltResource())
     _ = next(result)  # noqa

@@ -47,11 +47,13 @@ def make_csv(query_date: str) -> bytes:
 @pytest.fixture
 def mock_delta_table(tmp_path_factory):
     def query(partition_key_range: PartitionKeyRange, schema: TableSchema) -> str:
-        start_date, end_date = partition_key_range
+        start, end = partition_key_range
+        start_date = datetime.strptime(start, '%Y-%m-%d')
+        end_date = datetime.strptime(end, "%Y-%m-%d")
         tmp_dir = tmp_path_factory.mktemp("s3")
         fake_s3_bucket_url = f"file://{tmp_dir}/covid19/covid19datahub"
 
-        while start_date < end_date:
+        while start_date <= end_date:
             df = generate_dataframe_from_table_schema(schema=schema, load_date=start_date)
             df["year"] = start_date.year
             df["month"] = start_date.month
