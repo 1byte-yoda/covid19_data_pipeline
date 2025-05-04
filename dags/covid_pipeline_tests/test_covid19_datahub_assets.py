@@ -12,7 +12,6 @@ from dags.covid_pipeline.assets.schemas import Covid19DataHub
 def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, mock_delta_table):
     # GIVEN - Covid19DataHub data for 2023-02-01
     partition_key_range = PartitionKeyRange("2023-02-01", "2023-02-01")
-    context = dg.build_asset_context(partition_key_range=partition_key_range)
     tmp_dir = str(tmp_path_factory.mktemp("data"))
 
     # -- Patch below with local storage for testing
@@ -22,17 +21,18 @@ def test_covid19_delta_asset_schema_is_correctly_materialized(tmp_path_factory, 
     os.environ["COVID_DATAHUB_S3_BUCKET"] = s3_bucket_url
 
     # WHEN - DLT Pipeline Ingest Data from COVID_DATAHUB_S3_BUCKET
-    result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
-    materialized_asset = next(result)  # noqa
+    with dg.build_asset_context(partition_key_range=partition_key_range) as context:
+        result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
+        materialized_asset = next(result)  # noqa
 
-    df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
+        df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
 
-    # THEN Schema Metadata Must Match
-    assert materialized_asset.asset_key == AssetKey("covid19datahub")
-    assert materialized_asset.metadata["dataset_name"] == "covid19"
-    assert materialized_asset.metadata["dagster/column_schema"] == covid19datahub_schema
-    assert len(df) == 5
-    assert df["row_key"].nunique() == len(df)
+        # THEN Schema Metadata Must Match
+        assert materialized_asset.asset_key == AssetKey("covid19datahub")
+        assert materialized_asset.metadata["dataset_name"] == "covid19"
+        assert materialized_asset.metadata["dagster/column_schema"] == covid19datahub_schema
+        assert len(df) == 5
+        assert df["row_key"].nunique() == len(df)
 
 
 def test_covid19_delta_csv_asset_is_idempotent(tmp_path_factory, mock_delta_table):
@@ -46,10 +46,11 @@ def test_covid19_delta_csv_asset_is_idempotent(tmp_path_factory, mock_delta_tabl
     os.environ["COVID_DATAHUB_S3_BUCKET"] = s3_bucket_url
 
     # WHEN - DLT Pipeline Ingest The Exact Same Data Twice from COVID_DATAHUB_S3_BUCKET
+
     for _ in range(2):
-        context: dg.AssetExecutionContext = dg.build_asset_context(partition_key_range=partition_key_range)
-        result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
-        materialized_asset = next(result)  # noqa
+        with dg.build_asset_context(partition_key_range=partition_key_range) as context:
+            result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
+            materialized_asset = next(result)  # noqa
 
     # THEN Data Must Be Merged into the Delta Table without duplicates
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
@@ -68,9 +69,9 @@ def test_covid19_asset_download_with_range_key(tmp_path_factory, mock_delta_tabl
     os.environ["COVID_DATAHUB_S3_BUCKET"] = s3_bucket_url
 
     # WHEN - DLT Pipeline Ingest Data from COVID_DATAHUB_S3_BUCKET
-    context: dg.AssetExecutionContext = dg.build_asset_context(partition_key_range=partition_key_range)
-    result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
-    _ = next(result)  # noqa
+    with dg.build_asset_context(partition_key_range=partition_key_range) as context:
+        result = covid_datahub_assets(context=context, dagster_dlt=DagsterDltResource())
+        _ = next(result)  # noqa
 
     # THEN - Data for 20203-02-01 and 2023-02-03 Must Be Inserted to the Delta Table without duplicates
     df = DeltaTable(table_uri=f"file://{tmp_dir}/covid19/covid19datahub").to_pandas()
