@@ -25,7 +25,7 @@ TRIM(
         WHEN LOWER({{ column_name }}) IN ('occupied palestinian territory', 'west bank and gaza') THEN 'Palestine'
         WHEN LOWER({{ column_name }}) = 'korea, north' THEN 'North Korea'
         WHEN LOWER({{ column_name }}) = 'us' THEN 'United States'
-        WHEN LOWER({{ column_name }}) = 'winter olympics 2022' THEN 'Mainland China' -- identified via lat/lng in googlemaps
+        WHEN LOWER({{ column_name }}) IN ('china', 'winter olympics 2022') THEN 'Mainland China' -- identified via lat/lng in googlemaps
         WHEN LOWER({{ column_name }}) IN ('others', 'cruise ship', 'summer olympics 2020') THEN 'Japan'  -- identified via lat/lng in googlemaps
         WHEN LOWER({{ column_name }}) = 'ms zaandam' THEN 'Chile'  -- https://en.wikipedia.org/wiki/COVID-19_pandemic_on_cruise_ships#Zaandam
         ELSE {{ column_name }}

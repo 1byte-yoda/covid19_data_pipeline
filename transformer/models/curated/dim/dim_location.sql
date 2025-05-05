@@ -1,34 +1,61 @@
 {{ config(unique_key='location_id', incremental_strategy="delete+insert") }}
 
-WITH location_combined AS (
-    SELECT
-        COALESCE(cl.location_id, ccd.location_id) AS location_id,
-        COALESCE(cl.country, ccd.country) AS country,
-        COALESCE(cl.state, ccd.state) AS state,
-        COALESCE(cl.city, ccd.city) AS city,
-        COALESCE(cl.administrative_area_level, ccd.administrative_area_level) AS administrative_area_level,
-        COALESCE(cl.latitude, 0) AS latitude,
-        COALESCE(cl.longitude, 0) AS longitude,
-        COALESCE(ccd.population, 0) AS population,
-        cl.last_update -- used for incremental filter
+WITH github_covid_locations AS (
+    SELECT DISTINCT
+        cl.location_id,
+        cl.country,
+        cl.state,
+        cl.city,
+        cl.administrative_area_level,
+        cl.latitude,
+        cl.longitude,
+        ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY last_update DESC) AS row_num
     FROM {{ ref('cleansed_location') }} AS cl
-    FULL OUTER JOIN {{ ref('cleansed_covid_datahub') }} AS ccd
-        ON cl.location_id = ccd.location_id
     WHERE
         1 = 1
         {% if is_incremental() %}
             AND cl.last_update >= '{{ var('min_date') }}'
             AND cl.last_update <= '{{ var('max_date') }}'
         {% endif %}
+    QUALIFY row_num = 1
 ),
 
-deduped AS (
-    SELECT *,
-           ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY last_update DESC) AS row_num
-    FROM location_combined
+datahub_covid_location AS (
+    SELECT DISTINCT
+        ccd.location_id,
+        ccd.country,
+        ccd.state,
+        ccd.city,
+        ccd.administrative_area_level,
+        ccd.population,
+        ccd.date,
+        ROW_NUMBER() OVER (PARTITION BY location_id ORDER BY date DESC) AS row_num
+    FROM {{ ref('cleansed_covid_datahub') }} AS ccd
+    WHERE
+        1 = 1
+        {% if is_incremental() %}
+            AND ccd.date >= '{{ var('min_date') }}'
+            AND ccd.date <= '{{ var('max_date') }}'
+        {% endif %}
+    QUALIFY row_num = 1
+),
+
+location_combined AS (
+    SELECT
+        COALESCE(ccd.location_id, cl.location_id) AS location_id,
+        COALESCE(ccd.country, cl.country) AS country,
+        COALESCE(ccd.state, cl.state) AS state,
+        COALESCE(ccd.city, cl.city) AS city,
+        COALESCE(ccd.administrative_area_level, cl.administrative_area_level) AS administrative_area_level,
+        COALESCE(cl.latitude, 0)::DECIMAL(12, 7) AS latitude,
+        COALESCE(cl.longitude, 0)::DECIMAL(12, 7) AS longitude,
+        COALESCE(ccd.population, 0) AS population
+    FROM github_covid_locations AS cl
+    FULL OUTER JOIN datahub_covid_location AS ccd
+        ON cl.location_id = ccd.location_id
 )
 
-SELECT DISTINCT
+SELECT
     location_id,
     {{ title_case('country') }} AS country,
     {{ title_case('state') }} AS state,
@@ -37,5 +64,4 @@ SELECT DISTINCT
     latitude,
     longitude,
     population
-FROM deduped
-WHERE row_num = 1
+FROM location_combined
