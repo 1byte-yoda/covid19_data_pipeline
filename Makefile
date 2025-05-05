@@ -6,17 +6,17 @@ DBT_FOLDER := transformer
 FOLDERS_WITH_YML := dags transformer dagster_home docker-compose.yaml
 PY_FOLDERS := dags
 
-.PHONY: dbt_lint dbt_fmt dbt_test yaml_fmt black flake8 typehint checklist pytest, dbt_run dbt_refresh one_time_init init_infra up down
+.PHONY: dbt_lint dbt_fmt dbt_test yaml_fmt black flake8 typehint checklist pytest, dbt_run dbt_refresh initial_assets init_infra up down
 
 # Check for any SQL Lints in DBT
 .PHONY: dbt_lint
 dbt_lint:
-	sqlfluff lint $(DBT_FOLDER)
+	sqlfluff lint $(DBT_FOLDER) -v
 
 # Format SQL Code with DBT support
 .PHONY: dbt_fmt
 dbt_fmt:
-	sqlfluff fix $(DBT_FOLDER)
+	sqlfluff fix $(DBT_FOLDER) -v
 
 # Run DBT Tests
 .PHONY: dbt_test
@@ -47,7 +47,7 @@ typehint:
 # Run Dagster Asset Unit Tests
 .PHONY: pytest
 pytest:
-	pytest $(PY_FOLDERS)/covid_pipeline_tests -v -s
+	pytest $(PY_FOLDERS)/covid_pipeline_tests
 
 # Run Checklist for Continuous Integration and Deployment
 .PHONY: checklist
@@ -66,7 +66,7 @@ dbt_refresh:
 
 # Setup initial data in s3 bucket and initial models in DBT for convenient presentation
 .PHONY: one_time_init
-one_time_init:
+initial_assets:
 	docker exec -it dagster bash /init_assets.sh
 	make dbt_refresh
 	@echo Dagster Assets from 2020-01-22 up to 2023-02-28 has been pre-downloaded for your convenience
@@ -75,9 +75,15 @@ one_time_init:
 # Initialize the infrastructure needed for the project
 .PHONY: init_infra
 init_infra:
+	cat .env.example > .env
+	docker compose up minio --build -d
+	@sleep 20
 	terraform -chdir=infra/dev init
 	terraform -chdir=infra/dev apply -auto-approve
 	@echo "\nDESTINATION__FILESYSTEM__BUCKET_URL=s3://$$(terraform -chdir=infra/dev output -raw bucket_name)" >> .env
+
+tf_fmt:
+	terraform -chdir=infra/dev fmt .
 
 # Docker Compose Up
 .PHONY: up
