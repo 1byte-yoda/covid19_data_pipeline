@@ -14,20 +14,20 @@ class Covid19CsseGithub:
             columns=[
                 TableColumn(name="row_num", type="bigint", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
                 TableColumn(name="row_key", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),
-                TableColumn(name="fips", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="admin2", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="province_state", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="country_region", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="last_update", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="lat", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="longx", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="latitude", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="longitude", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
-                TableColumn(name="confirmed", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
+                TableColumn(name="fips", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="admin2", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="province_state", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="country_region", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="last_update", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="lat", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="longx", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="latitude", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="longitude", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
+                TableColumn(name="confirmed", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
                 TableColumn(name="deaths", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
                 TableColumn(name="recovered", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
                 TableColumn(name="active", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
-                TableColumn(name="combined_key", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}), #
+                TableColumn(name="combined_key", type="text", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
                 TableColumn(name="incident_rate", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
                 TableColumn(name="incidence_rate", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
                 TableColumn(name="case_fatality_ratio", type="double", description=None, constraints=TableColumnConstraints(nullable=True, unique=False, other=[]), tags={}),  #
@@ -49,6 +49,7 @@ class Covid19CsseGithub:
     @classmethod
     def dlt_schema(cls) -> list[TColumnSchema]:
         return _convert_table_schema_to_tcolumn_schema(table_schema=cls.dagster_table_schema())
+
 
 class Covid19DataHub:
     @classmethod
@@ -126,21 +127,12 @@ def _convert_to_pandas_dtypes(table_schema: TableSchema):
 
 
 def _convert_table_schema_to_tcolumn_schema(table_schema: TableSchema) -> list[TColumnSchema]:
-    supported_hints = {
-        "partition", "cluster", "sort", "primary_key", "row_key",
-        "parent_key", "root_key", "merge_key", "variant",
-        "hard_delete", "incremental"
-    }
+    supported_hints = {"partition", "cluster", "sort", "primary_key", "row_key", "parent_key", "root_key", "merge_key", "variant", "hard_delete", "incremental"}
 
     tcolumn_schemas = []
 
     for col in table_schema.columns:
-        tcol: TColumnSchema = {
-            "name": col.name,
-            "data_type": col.type,
-            "nullable": col.constraints.nullable,
-            "unique": col.constraints.unique
-        }
+        tcol: TColumnSchema = {"name": col.name, "data_type": col.type, "nullable": col.constraints.nullable, "unique": col.constraints.unique}
 
         for hint in col.constraints.other:
             if hint in supported_hints:
@@ -242,15 +234,13 @@ def _get_schema_changes(latest_schema_hash: str, table_name: str, db_schema: str
     return schema_diff_md
 
 
-def add_schema_evolution_metadata(context: AssetExecutionContext , asset: AssetMaterialization, schema_hash: str, dlt_schema: str):
+def add_schema_evolution_metadata(context: AssetExecutionContext, asset: AssetMaterialization, schema_hash: str, dlt_schema: str):
     md_content = ""
 
     if schema_hash:
         latest_hash_version = schema_hash[0]
         table_name, db_schema = asset.asset_key.to_python_identifier(), asset.metadata["dataset_name"]
-        md_content += _get_schema_changes(
-            latest_schema_hash=latest_hash_version, table_name=table_name, db_schema=db_schema, dlt_schema=dlt_schema
-        )
+        md_content += _get_schema_changes(latest_schema_hash=latest_hash_version, table_name=table_name, db_schema=db_schema, dlt_schema=dlt_schema)
 
     context.add_output_metadata(metadata={"schema_updates": MetadataValue.md(md_content)})
 

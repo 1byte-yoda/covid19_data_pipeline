@@ -56,11 +56,11 @@ def covid_datahub_source(start_date: Optional[date] = None, end_date: Optional[d
         dataset_name="covid19",
     ),
     dagster_dlt_translator=CustomDagsterDltTranslator(),
-    partitions_def=daily_partitions
+    partitions_def=daily_partitions,
 )
 def covid_datahub_assets(context: AssetExecutionContext, dagster_dlt: DagsterDltResource):
     start, end = context.partition_key_range
-    start_date = datetime.strptime(start, '%Y-%m-%d')
+    start_date = datetime.strptime(start, "%Y-%m-%d")
     end_date = datetime.strptime(end, "%Y-%m-%d")
     materialized_assets = dagster_dlt.run(context=context, dlt_source=covid_datahub_source(start_date=start_date, end_date=end_date))
 

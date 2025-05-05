@@ -54,17 +54,12 @@ def covid_github_source(start_date: Optional[date] = None, end_date: Optional[da
     dlt_source=covid_github_source(),
     dlt_pipeline=dlt.pipeline(pipeline_name="github_csse_daily", destination=dlt.destinations.filesystem(), dataset_name="covid19"),
     partitions_def=daily_partitions,
-    dagster_dlt_translator=CustomDagsterDltTranslator()
+    dagster_dlt_translator=CustomDagsterDltTranslator(),
 )
 def covid19_github_csse_assets(context: AssetExecutionContext, dagster_dlt: DagsterDltResource):
     start, end = context.partition_key_range
 
-    materialized_assets = dagster_dlt.run(
-        context=context, dlt_source=covid_github_source(
-            start_date=datetime.strptime(start, '%Y-%m-%d'),
-            end_date=datetime.strptime(end, "%Y-%m-%d")
-        )
-    )
+    materialized_assets = dagster_dlt.run(context=context, dlt_source=covid_github_source(start_date=datetime.strptime(start, "%Y-%m-%d"), end_date=datetime.strptime(end, "%Y-%m-%d")))
 
     schema_name = materialized_assets._dlt_pipeline.default_schema_name  # noqa
 

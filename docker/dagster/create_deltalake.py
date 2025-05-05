@@ -15,7 +15,7 @@ MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY", "datalake")
 MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "datalake")
 
 storage_options = {"allow_http": "true", "endpoint_url": f"http://{MINIO_ENDPOINT_URL}", "access_key_id": MINIO_ACCESS_KEY, "secret_access_key": MINIO_SECRET_KEY}
-s3_bucket = os.environ.get("DESTINATION__FILESYSTEM__BUCKET_URL", "s3://scratch")
+s3_bucket = os.environ.get("DESTINATION__FILESYSTEM__BUCKET_URL")
 
 
 def _safe_create_deltalake(s3_uri: str, table_schema: Union[Covid19CsseGithub, Covid19DataHub]):

@@ -10,21 +10,14 @@ def register_existing_s3_data(context: AssetExecutionContext):
     group_selection = AssetSelection.groups("covid")
     asset_keys = group_selection.resolve(context.repository_def.asset_graph)
     while start <= end:
-        partition = start.strftime('%Y-%m-%d')
+        partition = start.strftime("%Y-%m-%d")
 
         for asset_key in asset_keys:
             context.log_event(
                 AssetMaterialization(
-                    asset_key=asset_key,
-                    partition=partition,
-                    metadata={
-                        "external": True,
-                        "source": "manual_s3_sync",
-                        "notes": f"Partition {partition} marked as fulfilled via external upload."
-                    }
+                    asset_key=asset_key, partition=partition, metadata={"external": True, "source": "manual_s3_sync", "notes": f"Partition {partition} marked as fulfilled via external upload."}
                 )
             )
-
 
         start = start + timedelta(days=1)
 
