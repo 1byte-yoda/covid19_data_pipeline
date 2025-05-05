@@ -91,16 +91,18 @@ like DeltaLakes. Can be easily swap with MotherDuck for a more scalable producti
 
 **DLT:** The E in ELT. Python based data ingestion tool which has support for various sources / destinations. Offers good job metadata management to track ingestion loads.
 
-**Delta File Format:** Used alongside DLT to store the ingested data into S3. It is using Parquet behind the curtain for columnar storage. 
-It offers a good integration with DLT which makes it easy to operate. Schema Evolution ready that enables the system to be more robust to upstream schema changes 
+**Delta File Format:** Used alongside DLT to store the ingested data into S3. It is using Parquet behind the curtain for columnar storage which is good for our Analytics Use Case. 
+It offers a good integration with DLT which makes it easy to operate. It is also schema Evolution ready that enables the system to be more robust to upstream schema changes 
 
 **Dockerized Workflow:** Promotes reproducibility across development and production environments.
 
-**Apache Superset:** Business Intelligence Tool that is part of The Modern Data Stack. It has compatibility with Dimensional Model slicing. Offers wide range of chart types. 
-It has a built-in user access control feature which is ideal for data governance implementation.
+**Apache Superset:** Business Intelligence Tool that is part of The Modern Data Stack. It has compatibility with Dimensional Model type of data that makes it suitable for slicing and dicing of BI data to generate reports.
+Offers wide range of chart types. While it offers a UI based data aggregation through drag and drop, it also offers a flexibility of transforming your data before visualizing it... this
+aspect is useful especially for a self-service analytics use case. It also has a built-in user access control feature which is ideal for data governance implementation.
 
 **Star Schema:** A dimensional model which is composed of facts and dimension tables. This data model brings the balance between storage efficiency - just right amount of redundancy,
-usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling.
+usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling. This is perfect for our use case since our data platform will do 
+more reading than writing.
 
 **Medallion Architecture:** The architecture I used to establish an increasing level of data quality in the data pipeline represented by raw, cleansed, and curated layers.
 This promotes separation of concern which adds up to the project maintainability.
