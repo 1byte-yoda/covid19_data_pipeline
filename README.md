@@ -72,8 +72,14 @@ Below, we will define the focus area of our analysis to centralize the scope our
 
 ---
 ## Design Decisions
-**Dagster over Airflow/Mage:** Modular and typed Python Based orchestration framework which offers better local development UX. Offers open source support for Modern data stack
-integration which makes it easy to maintain. Good metadata handling for data lineage and data observability. Offers Dagster Cloud for reliable and scalable Production workloads 
+**General:** In general, I followed the KISS principle to make the design simple and to promote longevity in terms of project maintenance. Another principle I followed was
+idempotency for better predictability and less introduction of bugs to the pipeline. Finally, graceful handling of errors... in the data ingestion layer, changes into the upstream
+data sources were handled gracefully by implementing ELT (schema on read) alongside schema registry/versioning –thanks to DLT and DeltaLake. In the transformation layer,
+data contracts were enforced in the form of DBT tests to ensure data integrity, data accuracy, and data correctness. For any data pipeline errors, alerts were handled through slack notifications.
+
+**Dagster over Airflow/Mage:** is a modular and typed Python Based orchestration framework which offers better local development UX. Offers open source support for Modern data stack
+integration which makes it easy to maintain. Good pipeline monitoring for easier pipeline maintenance, and metadata handling for data lineage 
+and data observability. Offers Dagster Cloud for reliable and scalable Production workloads 
 
 **DBT for transformation:** Wrapper for SQL based transformations. It enables version control, documentation, and model dependency graphs which also has a plugin for dagster. Handles the database object
 creation for you, just write your SQL transformation. Also offers data testing which could be integrated with CICDs to ensure data correctness and reliability.
@@ -96,6 +102,8 @@ It has a built-in user access control feature which is ideal for data governance
 **Star Schema:** A dimensional model which is composed of facts and dimension tables. This data model brings the balance between storage efficiency - just right amount of redundancy,
 usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling.
 
+**Medallion Architecture:** The architecture I used to establish an increasing level of data quality in the data pipeline represented by raw, cleansed, and curated layers.
+This promotes separation of concern which adds up to the project maintainability.
 
 ---
 ## COVID19 Global Pandemic Dashboard
