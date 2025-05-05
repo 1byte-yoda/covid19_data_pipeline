@@ -159,7 +159,7 @@ Visit the following link and follow the instructions for software installation
 
 ### 3. Initialize The Infrastructure Needed For The Project
 The command below will create a `.env` file of off the `.env.example` file which contains the project config and credentials.
-Then, a MinIO S3 Bucket and its name will be appended to .env file 
+Then, a MinIO S3 Bucket will be created and its name will be appended to .env file 
 ```bash
 make init_infra
 ```
