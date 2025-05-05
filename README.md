@@ -89,7 +89,7 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
     <tr>
       <td>Dagster</td>
       <td>Orchestration framework</td>
-      <td>Was chosen over Airflow/Mage due to its modular and typed nature -- that gives a better local development UX, open-source integration with Modern Data Stack, strong pipeline monitoring and metadata handling, supports Dagster Cloud for production scalability.</td>
+      <td>Was chosen over Airflow/Mage due to its modular and typed nature -- that gives a better local development UX; Offers open-source integration with Modern Data Stack, strong pipeline monitoring and metadata handling, supports Dagster Cloud for production scalability.</td>
     </tr>
     <tr>
       <td>DBT for transformation</td>
