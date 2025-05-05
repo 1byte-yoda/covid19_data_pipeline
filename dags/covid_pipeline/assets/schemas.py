@@ -3,7 +3,6 @@ import json
 
 import duckdb
 import jsondiff as jd
-import pandas as pd
 from dlt.common.schema import TColumnSchema
 from dagster import TableSchema, TableColumn, TableColumnConstraints, TableConstraints, MetadataValue, AssetExecutionContext, AssetMaterialization
 
@@ -256,14 +255,3 @@ def add_schema_evolution_metadata(context: AssetExecutionContext , asset: AssetM
     context.add_output_metadata(metadata={"schema_updates": MetadataValue.md(md_content)})
 
     return md_content
-
-
-def init_delta_tables():
-    from deltalake import write_deltalake
-    covid19datahub_df = pd.DataFrame({col: pd.Series(dtype=dtype) for col, dtype in Covid19DataHub.pandas_schema().items()})
-    covid19_github_df = pd.DataFrame({col: pd.Series(dtype=dtype) for col, dtype in Covid19CsseGithub.pandas_schema().items()})
-    write_deltalake(table_or_uri="s3://testing/covid19/github_csse_daily", data=covid19_github_df, partition_by=["year", "month", "day"], mode="overwrite", storage_options={"allow_http": "true", "endpoint_url": "http://localhost:9050", "access_key_id": "datalake", "secret_access_key": "datalake"}, schema_mode="overwrite")
-    write_deltalake(table_or_uri="s3://testing/covid19/covid19datahub", data=covid19datahub_df, partition_by=["year", "month", "day"], mode="overwrite", storage_options={"allow_http": "true", "endpoint_url": "http://localhost:9050", "access_key_id": "datalake", "secret_access_key": "datalake"}, schema_mode="overwrite")
-
-if __name__ == '__main__':
-    init_delta_tables()

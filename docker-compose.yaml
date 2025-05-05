@@ -34,6 +34,7 @@ services:
       - ./dags:/dags
       - ./transformer:/transformer
       - ./docker/dagster/init_assets.sh:/init_assets.sh
+      - ./docker/dagster/create_deltalake.py:/create_deltalake.py
     ports:
       - "3000:3000"
     depends_on:
@@ -69,10 +70,7 @@ services:
     image: postgres:14
     container_name: postgres
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: dagster
-      POSTGRES_PASSWORD: dagster
-      POSTGRES_DB: dagster
+    env_file: .env
     volumes:
       - ./pg_data:/var/lib/postgresql/data
     ports:
