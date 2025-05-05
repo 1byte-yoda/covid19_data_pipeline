@@ -578,3 +578,9 @@ models:
       - name: vent
         description: Patients on ventilators.
         tests: [positive_value]
+  - name: mart_epidemiology
+    columns:
+      - name: covid_id
+        tests:
+          - not_null
+          - unique
