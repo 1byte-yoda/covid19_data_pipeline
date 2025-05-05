@@ -15,26 +15,22 @@ WITH covid_hosp AS (
         {% endif %}
 )
 
-,max_values AS (
-    SELECT DISTINCT
-        location_id
+,daily_covid_hosp_with_id AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
+        ,location_id
         ,date_id
-        ,max(hosp) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS hosp
-        ,max(icu) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS icu
-        ,max(vent) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS vent
+        ,COALESCE(hosp - LAG(hosp) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS hosp
+        ,COALESCE(icu - LAG(icu) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS icu
+        ,COALESCE(vent - LAG(vent) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS vent
     FROM covid_hosp
 )
 
+
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
-    ,*
-FROM max_values
+    *,
+    ROW_NUMBER() OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS row_num
+FROM daily_covid_hosp_with_id
+QUALIFY row_num = 1
+
+

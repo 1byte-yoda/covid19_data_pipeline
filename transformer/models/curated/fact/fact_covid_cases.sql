@@ -40,67 +40,51 @@ WITH covid_cases AS (
 )
 
 ,unique_covid_cases AS (
-    SELECT DISTINCT
-        * EXCLUDE (covid_id,confirmed,deaths,recovered,active,incident_rate,case_fatality_ratio)
-        ,covid_id
-        ,first_value(confirmed) OVER (
-            PARTITION BY covid_id
-            ORDER BY date_id DESC
-        ) AS confirmed
-        ,first_value(deaths) OVER (
-            PARTITION BY covid_id
-            ORDER BY date_id DESC
-        ) AS deaths
-        ,first_value(recovered) OVER (
-            PARTITION BY covid_id
-            ORDER BY date_id DESC
-        ) AS recovered
-        ,first_value(active) OVER (
-            PARTITION BY covid_id
-            ORDER BY date_id DESC
-        ) AS active
-        ,first_value(incident_rate) OVER (
-            PARTITION BY covid_id
-            ORDER BY date_id DESC
-        ) AS incident_rate
-        ,first_value(case_fatality_ratio) OVER (
-            PARTITION BY covid_id
-            ORDER BY date_id DESC
-        ) AS case_fatality_ratio
+    SELECT
+        covid_id
+        ,location_id
+        ,confirmed
+        ,deaths
+        ,recovered
+        ,active
+        ,incident_rate
+        ,case_fatality_ratio
+        ,date_id
+        ,confirmed * 100000 / incident_rate AS population
+        ,ROW_NUMBER() OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS row_num
     FROM covid_cases_with_sk
+    QUALIFY row_num = 1
 )
 
-,covid_with_prev_cases AS (
+,new_covid_cases AS (
     SELECT
-        *
-        ,lag(confirmed) OVER (
+        * EXCLUDE (confirmed, deaths, recovered, active)
+        ,COALESCE(confirmed - lag(confirmed) OVER (
             PARTITION BY location_id
             ORDER BY date_id
-        ) AS prev_confirmed
-        ,lag(deaths) OVER (
+        ), 0) AS confirmed
+        ,COALESCE(deaths - lag(deaths) OVER (
             PARTITION BY location_id
             ORDER BY date_id
-        ) AS prev_deaths
-        ,lag(recovered) OVER (
+        ), 0) AS deaths
+        ,COALESCE(recovered - lag(recovered) OVER (
             PARTITION BY location_id
             ORDER BY date_id
-        ) AS prev_recovered
-        ,lag(active) OVER (
+        ), 0) AS recovered
+        ,COALESCE(active - lag(active) OVER (
             PARTITION BY location_id
             ORDER BY date_id
-        ) AS prev_active
+        ), 0) AS active
     FROM unique_covid_cases
 )
 
-SELECT
-    covid_id
-    ,date_id
-    ,location_id
-    ,incident_rate
-    ,case_fatality_ratio
-    ,CASE WHEN prev_confirmed < confirmed THEN confirmed - prev_confirmed ELSE 0 END AS confirmed
-    ,CASE WHEN prev_deaths < deaths THEN deaths - prev_deaths ELSE 0 END AS deaths
-    ,CASE WHEN prev_recovered < recovered THEN recovered - prev_recovered ELSE 0 END AS recovered
-    ,CASE WHEN prev_active < active THEN active - prev_active ELSE 0 END AS active
+,recalculated_case_fatality_and_incident_rate AS (
+    SELECT
+        * EXCLUDE(incident_rate, case_fatality_ratio)
+        , COALESCE(confirmed / population * 100000, 0) AS incident_rate
+        , deaths / confirmed AS case_fatality_ratio
+    FROM new_covid_cases
+)
 
-FROM covid_with_prev_cases
+SELECT *
+FROM recalculated_case_fatality_and_incident_rate

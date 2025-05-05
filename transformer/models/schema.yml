@@ -1,6 +1,9 @@
 ---
 version: 2
 models:
+  ########################################################
+  #                          RAW                         #
+  ########################################################
   - name: raw_github_csse_daily
     description: COVID19 Data downloaded from github repository by the Center for
       Systems Science and Engineering (CSSE) at Johns Hopkins University
@@ -14,302 +17,10 @@ models:
     description: COVID19 Data downloaded from github repository by the Center for
       Systems Science and Engineering (CSSE) at Johns Hopkins University
     tests: [table_not_empty]
-  - name: fact_covid_cases
-    description: Daily Fact Table containing the fact data from JHU Github Repository
-    columns:
-      - name: covid_id
-        description: Unique identifier of each covid cases generated using the hash
-          of location_id and date_id
-        tests: [unique, not_null]
-      - name: date_id
-        description: The date key in %Y%m%d format to identify which day a covid case
-          belongs
-        tests:
-          - relationships:
-              to: ref('dim_date')
-              field: date_id
-          - not_null
-      - name: location_id
-        description: The location_id in hash format generated using the combination
-          of country, state, city, and administrative_area_level
-        tests:
-          - relationships:
-              to: ref('dim_location')
-              field: location_id
-          - not_null
-      - name: incident_rate
-        description: Incidence Rate calculated as cases per 100,000 persons.
-        tests: [positive_value]
-      - name: case_fatality_ratio
-        description: Case-Fatality Ratio (%) calculated as number of recorded deaths
-          divided by number of recorded cases.
-        tests: [positive_value]
-      - name: confirmed
-        description: Total confirmed and probable cases where reported.
-        tests: [positive_value]
-      - name: deaths
-        description: Total confirmed and probable deaths where reported.
-        tests: [positive_value]
-      - name: recovered
-        description: Estimated number of recovered cases based on local media and
-          state/local reporting. May be substantially lower than actual values.
-        tests: [positive_value]
-      - name: active
-        description: Active cases calculated as total cases minus recovered and deaths.
-          This is a reference-only value after reporting of recovered cases ceased.
-        tests: [positive_value]
-  - name: fact_covid_hospitalization
-    description: >
-      This table contains Daily COVID-19 hospitalization metrics, including counts
-      of hospitalized patients,
-      patients in intensive care units (ICU), and those requiring invasive ventilation.
-      Each record reflects
-      the number of patients on the specific date.
-    columns:
-      - name: covid_id
-        description: Unique identifier of each covid cases generated using the hash
-          of location_id and date_id
-        tests: [unique, not_null]
-      - name: date_id
-        description: The date key in %Y%m%d format to identify which day a covid case
-          belongs
-        tests:
-          - relationships:
-              to: ref('dim_date')
-              field: date_id
-          - not_null
-      - name: location_id
-        description: The location_id in hash format generated using the combination
-          of country, state, city, and administrative_area_level
-        tests:
-          - relationships:
-              to: ref('dim_location')
-              field: location_id
-          - not_null
-      - name: hosp
-        description: Number of hospitalized patients on the reported date.
-        tests: [positive_value]
-      - name: icu
-        description: Number of hospitalized patients in intensive therapy (ICU) on
-          the reported date.
-        tests: [positive_value]
-      - name: vent
-        description: Number of patients requiring invasive mechanical ventilation
-          on the reported date.
-        tests: [positive_value]
-  - name: fact_covid_tests
-    description: >
-      This table contains cumulative COVID-19 testing and vaccination data. It includes
-      the total number of tests
-      conducted, total vaccine doses administered, the number of people who received
-      at least one vaccine dose,
-      and the number of people fully vaccinated according to local vaccination protocols.
-    columns:
-      - name: covid_id
-        description: Unique identifier of each covid cases generated using the hash
-          of location_id and date_id
-        tests: [unique, not_null]
-      - name: date_id
-        description: The date key in %Y%m%d format to identify which day a covid case
-          belongs
-        tests:
-          - relationships:
-              to: ref('dim_date')
-              field: date_id
-          - not_null
-      - name: location_id
-        description: The location_id in hash format generated using the combination
-          of country, state, city, and administrative_area_level
-        tests:
-          - relationships:
-              to: ref('dim_location')
-              field: location_id
-      - name: tests
-        description: Cumulative number of COVID-19 tests conducted.
-        tests: [positive_value]
-      - name: vaccines
-        description: Cumulative number of total vaccine doses administered.
-        tests: [positive_value]
-      - name: people_vaccinated
-        description: Cumulative number of people who received at least one vaccine
-          dose.
-        tests: [positive_value]
-      - name: people_fully_vaccinated
-        description: Cumulative number of people who received all doses prescribed
-          by the vaccination protocol.
-        tests: [positive_value]
-  - name: fact_covid_policy_measures
-    description: This model includes various government response indicators for Covid-19,
-      with categorical encodings and their corresponding meanings.
-    columns:
-      - name: school_closing
-        description: >
-          0 - No measures
-          1 - Recommend closing or all schools open with alterations resulting in
-          significant differences compared to non-Covid-19 operations
-          2 - Require closing (only some levels or categories, e.g. just high school,
-          or just public schools)
-          3 - Require closing all levels
-        tests:
-          - accepted_values:
-              values: [-3, -2, -1, 0, 1, 2, 3]
-      - name: workplace_closing
-        description: >
-          0 - No measures
-          1 - Recommend closing (or recommend work from home) or all businesses open
-          with alterations resulting in significant differences compared to non-Covid-19
-          operation
-          2 - Require closing (or work from home) for some sectors or categories of
-          workers
-          3 - Require closing (or work from home) for all-but-essential workplaces
-          (e.g. grocery stores, doctors)
-        tests:
-          - accepted_values:
-              values: [-3, -2, -1, 0, 1, 2, 3]
-      - name: cancel_events
-        description: >
-          0 - No measures
-          1 - Recommend cancelling
-          2 - Require cancelling
-        tests:
-          - accepted_values:
-              values: [-2, -1, 0, 1, 2]
-      - name: gatherings_restrictions
-        description: >
-          0 - No restrictions
-          1 - Restrictions on very large gatherings (limit > 1000 people)
-          2 - Restrictions on gatherings between 101-1000 people
-          3 - Restrictions on gatherings between 11-100 people
-          4 - Restrictions on gatherings of 10 people or less
-        tests:
-          - accepted_values:
-              values: [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-      - name: transport_closing
-        description: >
-          0 - No measures
-          1 - Recommend closing (or significantly reduce volume/route/means of transport)
-          2 - Require closing (or prohibit most citizens from using it)
-        tests:
-          - accepted_values:
-              values: [-2, -1, 0, 1, 2]
-      - name: stay_home_restrictions
-        description: >
-          0 - No measures
-          1 - Recommend not leaving home
-          2 - Require staying home with exceptions (e.g. exercise, groceries)
-          3 - Require staying home with minimal exceptions (e.g. one trip/week, one
-          person allowed out)
-        tests:
-          - accepted_values:
-              values: [-3, -2, -1, 0, 1, 2, 3]
-      - name: internal_movement_restrictions
-        description: >
-          0 - No measures
-          1 - Recommend not to travel between regions/cities
-          2 - Internal movement restrictions in place
-        tests:
-          - accepted_values:
-              values: [-2, -1, 0, 1, 2]
-      - name: international_movement_restrictions
-        description: >
-          0 - No restrictions
-          1 - Screening arrivals
-          2 - Quarantine arrivals from some or all regions
-          3 - Ban arrivals from some regions
-          4 - Total border closure
-        tests:
-          - accepted_values:
-              values: [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-      - name: information_campaigns
-        description: >
-          0 - No Covid-19 public information campaign
-          1 - Public officials urging caution about Covid-19
-          2 - Coordinated public information campaign (e.g. across traditional and
-          social media)
-        tests:
-          - accepted_values:
-              values: [-2, -1, 0, 1, 2]
-      - name: testing_policy
-        description: >
-          0 - No testing policy
-          1 - Testing only for symptomatic individuals who meet specific criteria
-          2 - Testing anyone showing symptoms
-          3 - Open public testing (e.g. drive-through testing for asymptomatic individuals)
-        tests:
-          - accepted_values:
-              values: [-3, -2, -1, 0, 1, 2, 3]
-      - name: contact_tracing
-        description: >
-          0 - No contact tracing
-          1 - Limited contact tracing; not done for all cases
-          2 - Comprehensive contact tracing; done for all identified cases
-        tests:
-          - accepted_values:
-              values: [-2, -1, 0, 1, 2]
-      - name: facial_coverings
-        description: >
-          0 - No policy
-          1 - Recommended
-          2 - Required in some specified public spaces
-          3 - Required in all shared/public spaces
-          4 - Required outside the home at all times
-        tests:
-          - accepted_values:
-              values: [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-      - name: vaccination_policy
-        description: >
-          0 - No availability
-          1 - Available to one group: key workers / clinically vulnerable / elderly
-          2 - Available to two of the above groups
-          3 - Available to all of the above groups
-          4 - All three groups plus partial additional availability
-          5 - Universal availability
-        tests:
-          - accepted_values:
-              values: [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-      - name: elderly_people_protection
-        description: >
-          0 - No measures
-          1 - Recommended isolation/hygiene and visitor restrictions for LTCFs or
-          at-home elderly
-          2 - Narrow restrictions in LTCFs or some home protection measures
-          3 - Extensive restrictions for LTCFs and home isolation with minimal exceptions
-        tests:
-          - accepted_values:
-              values: [-3, -2, -1, 0, 1, 2, 3]
-  - name: dim_date
-    description: >
-      This model generates a complete date dimension from January 1, 2020 to December
-      31, 2030.  It includes keys and attributes useful for time-based analysis.
-    columns:
-      - name: date_value
-        description: The actual date (calendar date).
-      - name: date_id
-        description: Unique integer identifier for the date in YYYYMMDD format.
-      - name: day_of_year
-        description: Day of the year (1–366).
-      - name: day_name
-        description: Full name of the day of the week (e.g. Monday, Tuesday).
-      - name: week_key
-        description: Concatenation of year and ISO week number (e.g. 202401).
-      - name: week_of_year
-        description: Week number of the year (1–53).
-      - name: month_of_year
-        description: Month number of the year (1–12).
-      - name: month_key
-        description: Concatenation of year and zero-padded month (e.g. 202401).
-      - name: day_of_month
-        description: Day of the month (1–31).
-      - name: month_name_short
-        description: Three-letter abbreviation of the month (e.g. Jan, Feb).
-      - name: month_name
-        description: Full name of the month (e.g. January, February).
-      - name: quarter_key
-        description: Concatenation of year and quarter number (e.g. 20241 for Q1 2024).
-      - name: quarter_of_year
-        description: Quarter number of the year (1–4).
-      - name: year_key
-        description: The four-digit year (e.g. 2024).
+
+  ########################################################
+  #                        CLEANSED                      #
+  ########################################################
   - name: cleansed_github_csse_daily
     description: Cleaned Covid-19 case data, ensuring all case metrics are non-negative
       and timestamps are properly parsed.
@@ -578,6 +289,310 @@ models:
       - name: vent
         description: Patients on ventilators.
         tests: [positive_value]
+
+  ########################################################
+  #                        CURATED                       #
+  ########################################################
+  - name: fact_covid_cases
+    description: Daily Fact Table containing the fact data from JHU Github Repository
+    columns:
+      - name: covid_id
+        description: Unique identifier of each covid cases generated using the hash
+          of location_id and date_id
+        tests: [ unique, not_null ]
+      - name: date_id
+        description: The date key in %Y%m%d format to identify which day a covid case
+          belongs
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_id
+          - not_null
+      - name: location_id
+        description: The location_id in hash format generated using the combination
+          of country, state, city, and administrative_area_level
+        tests:
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+          - not_null
+      - name: incident_rate
+        description: Incidence Rate calculated as cases per 100,000 persons.
+        tests: [ not_null ]
+      - name: case_fatality_ratio
+        description: Case-Fatality Ratio (%) calculated as number of recorded deaths
+          divided by number of recorded cases.
+        tests: [ not_null ]
+      - name: confirmed
+        description: Total confirmed and probable cases where reported.
+        tests: [ not_null ]
+      - name: deaths
+        description: Total confirmed and probable deaths where reported.
+        tests: [ not_null ]
+      - name: recovered
+        description: Estimated number of recovered cases based on local media and
+          state/local reporting. May be substantially lower than actual values.
+        tests: [ not_null ]
+      - name: active
+        description: Active cases calculated as total cases minus recovered and deaths.
+          This is a reference-only value after reporting of recovered cases ceased.
+        tests: [ not_null ]
+  - name: fact_covid_hospitalization
+    description: >
+      This table contains Daily COVID-19 hospitalization metrics, including counts
+      of hospitalized patients,
+      patients in intensive care units (ICU), and those requiring invasive ventilation.
+      Each record reflects
+      the number of patients on the specific date.
+    columns:
+      - name: covid_id
+        description: Unique identifier of each covid cases generated using the hash
+          of location_id and date_id
+        tests: [ unique, not_null ]
+      - name: date_id
+        description: The date key in %Y%m%d format to identify which day a covid case
+          belongs
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_id
+          - not_null
+      - name: location_id
+        description: The location_id in hash format generated using the combination
+          of country, state, city, and administrative_area_level
+        tests:
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+          - not_null
+      - name: hosp
+        description: Number of hospitalized patients on the reported date.
+        tests: [ not_null ]
+      - name: icu
+        description: Number of hospitalized patients in intensive therapy (ICU) on
+          the reported date.
+        tests: [ not_null ]
+      - name: vent
+        description: Number of patients requiring invasive mechanical ventilation
+          on the reported date.
+        tests: [ not_null ]
+  - name: fact_covid_tests
+    description: >
+      This table contains daily COVID-19 testing and vaccination data. It includes
+      the total number of tests
+      conducted, total vaccine doses administered, the number of people who received
+      at least one vaccine dose,
+      and the number of people fully vaccinated according to local vaccination protocols.
+    columns:
+      - name: covid_id
+        description: Unique identifier of each covid cases generated using the hash
+          of location_id and date_id
+        tests: [ unique, not_null ]
+      - name: date_id
+        description: The date key in %Y%m%d format to identify which day a covid case
+          belongs
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_id
+          - not_null
+      - name: location_id
+        description: The location_id in hash format generated using the combination
+          of country, state, city, and administrative_area_level
+        tests:
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: tests
+        description: Daily number of COVID-19 tests conducted.
+        tests: [ not_null ]
+      - name: vaccines
+        description: Daily number of total vaccine doses administered.
+        tests: [ not_null ]
+      - name: people_vaccinated
+        description: Daily number of people who received at least one vaccine
+          dose.
+        tests: [ not_null ]
+      - name: people_fully_vaccinated
+        description: Daily number of people who received all doses prescribed
+          by the vaccination protocol.
+        tests: [ not_null ]
+  - name: fact_covid_policy_measures
+    description: This model includes various government response indicators for Covid-19,
+      with categorical encodings and their corresponding meanings.
+    columns:
+      - name: school_closing
+        description: >
+          0 - No measures
+          1 - Recommend closing or all schools open with alterations resulting in
+          significant differences compared to non-Covid-19 operations
+          2 - Require closing (only some levels or categories, e.g. just high school,
+          or just public schools)
+          3 - Require closing all levels
+        tests:
+          - accepted_values:
+              values: [ -3, -2, -1, 0, 1, 2, 3 ]
+      - name: workplace_closing
+        description: >
+          0 - No measures
+          1 - Recommend closing (or recommend work from home) or all businesses open
+          with alterations resulting in significant differences compared to non-Covid-19
+          operation
+          2 - Require closing (or work from home) for some sectors or categories of
+          workers
+          3 - Require closing (or work from home) for all-but-essential workplaces
+          (e.g. grocery stores, doctors)
+        tests:
+          - accepted_values:
+              values: [ -3, -2, -1, 0, 1, 2, 3 ]
+      - name: cancel_events
+        description: >
+          0 - No measures
+          1 - Recommend cancelling
+          2 - Require cancelling
+        tests:
+          - accepted_values:
+              values: [ -2, -1, 0, 1, 2 ]
+      - name: gatherings_restrictions
+        description: >
+          0 - No restrictions
+          1 - Restrictions on very large gatherings (limit > 1000 people)
+          2 - Restrictions on gatherings between 101-1000 people
+          3 - Restrictions on gatherings between 11-100 people
+          4 - Restrictions on gatherings of 10 people or less
+        tests:
+          - accepted_values:
+              values: [ -4, -3, -2, -1, 0, 1, 2, 3, 4 ]
+      - name: transport_closing
+        description: >
+          0 - No measures
+          1 - Recommend closing (or significantly reduce volume/route/means of transport)
+          2 - Require closing (or prohibit most citizens from using it)
+        tests:
+          - accepted_values:
+              values: [ -2, -1, 0, 1, 2 ]
+      - name: stay_home_restrictions
+        description: >
+          0 - No measures
+          1 - Recommend not leaving home
+          2 - Require staying home with exceptions (e.g. exercise, groceries)
+          3 - Require staying home with minimal exceptions (e.g. one trip/week, one
+          person allowed out)
+        tests:
+          - accepted_values:
+              values: [ -3, -2, -1, 0, 1, 2, 3 ]
+      - name: internal_movement_restrictions
+        description: >
+          0 - No measures
+          1 - Recommend not to travel between regions/cities
+          2 - Internal movement restrictions in place
+        tests:
+          - accepted_values:
+              values: [ -2, -1, 0, 1, 2 ]
+      - name: international_movement_restrictions
+        description: >
+          0 - No restrictions
+          1 - Screening arrivals
+          2 - Quarantine arrivals from some or all regions
+          3 - Ban arrivals from some regions
+          4 - Total border closure
+        tests:
+          - accepted_values:
+              values: [ -4, -3, -2, -1, 0, 1, 2, 3, 4 ]
+      - name: information_campaigns
+        description: >
+          0 - No Covid-19 public information campaign
+          1 - Public officials urging caution about Covid-19
+          2 - Coordinated public information campaign (e.g. across traditional and
+          social media)
+        tests:
+          - accepted_values:
+              values: [ -2, -1, 0, 1, 2 ]
+      - name: testing_policy
+        description: >
+          0 - No testing policy
+          1 - Testing only for symptomatic individuals who meet specific criteria
+          2 - Testing anyone showing symptoms
+          3 - Open public testing (e.g. drive-through testing for asymptomatic individuals)
+        tests:
+          - accepted_values:
+              values: [ -3, -2, -1, 0, 1, 2, 3 ]
+      - name: contact_tracing
+        description: >
+          0 - No contact tracing
+          1 - Limited contact tracing; not done for all cases
+          2 - Comprehensive contact tracing; done for all identified cases
+        tests:
+          - accepted_values:
+              values: [ -2, -1, 0, 1, 2 ]
+      - name: facial_coverings
+        description: >
+          0 - No policy
+          1 - Recommended
+          2 - Required in some specified public spaces
+          3 - Required in all shared/public spaces
+          4 - Required outside the home at all times
+        tests:
+          - accepted_values:
+              values: [ -4, -3, -2, -1, 0, 1, 2, 3, 4 ]
+      - name: vaccination_policy
+        description: >
+          0 - No availability
+          1 - Available to one group: key workers / clinically vulnerable / elderly
+          2 - Available to two of the above groups
+          3 - Available to all of the above groups
+          4 - All three groups plus partial additional availability
+          5 - Universal availability
+        tests:
+          - accepted_values:
+              values: [ -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 ]
+      - name: elderly_people_protection
+        description: >
+          0 - No measures
+          1 - Recommended isolation/hygiene and visitor restrictions for LTCFs or
+          at-home elderly
+          2 - Narrow restrictions in LTCFs or some home protection measures
+          3 - Extensive restrictions for LTCFs and home isolation with minimal exceptions
+        tests:
+          - accepted_values:
+              values: [ -3, -2, -1, 0, 1, 2, 3 ]
+  - name: dim_date
+    description: >
+      This model generates a complete date dimension from January 1, 2020 to December
+      31, 2030.  It includes keys and attributes useful for time-based analysis.
+    columns:
+      - name: date_value
+        description: The actual date (calendar date).
+      - name: date_id
+        description: Unique integer identifier for the date in YYYYMMDD format.
+      - name: day_of_year
+        description: Day of the year (1–366).
+      - name: day_name
+        description: Full name of the day of the week (e.g. Monday, Tuesday).
+      - name: week_key
+        description: Concatenation of year and ISO week number (e.g. 202401).
+      - name: week_of_year
+        description: Week number of the year (1–53).
+      - name: month_of_year
+        description: Month number of the year (1–12).
+      - name: month_key
+        description: Concatenation of year and zero-padded month (e.g. 202401).
+      - name: day_of_month
+        description: Day of the month (1–31).
+      - name: month_name_short
+        description: Three-letter abbreviation of the month (e.g. Jan, Feb).
+      - name: month_name
+        description: Full name of the month (e.g. January, February).
+      - name: quarter_key
+        description: Concatenation of year and quarter number (e.g. 20241 for Q1 2024).
+      - name: quarter_of_year
+        description: Quarter number of the year (1–4).
+      - name: year_key
+        description: The four-digit year (e.g. 2024).
+
+  ########################################################
+  #                         MARTS                        #
+  ########################################################
   - name: mart_epidemiology
     columns:
       - name: covid_id

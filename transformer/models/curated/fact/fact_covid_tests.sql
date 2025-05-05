@@ -16,30 +16,20 @@ WITH covid_tests AS (
         {% endif %}
 )
 
-,max_values AS (
-    SELECT DISTINCT
-        location_id
+,new_covid_tests_with_id AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
+        ,location_id
         ,date_id
-        ,max(tests) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS tests
-        ,max(vaccines) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS vaccines
-        ,max(people_vaccinated) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS people_vaccinated
-        ,max(people_fully_vaccinated) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS people_fully_vaccinated
+        ,COALESCE(tests - LAG(tests) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS tests
+        ,COALESCE(vaccines - LAG(vaccines) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS vaccines
+        ,COALESCE(people_vaccinated - LAG(people_vaccinated) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS people_vaccinated
+        ,COALESCE(people_fully_vaccinated - LAG(people_fully_vaccinated) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS people_fully_vaccinated
     FROM covid_tests
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
+    ROW_NUMBER() OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS row_num
     ,*
-FROM max_values
+FROM new_covid_tests_with_id
+QUALIFY row_num = 1
