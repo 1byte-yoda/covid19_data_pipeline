@@ -13,6 +13,9 @@ SELECT DISTINCT
     ,dl.longitude
     ,dl.latitude
     ,dl.administrative_area_level
+    ,dl.iso2
+    ,dl.iso3
+    ,dl.continent
     ,dl.population
     ,f1.confirmed
     ,f1.deaths

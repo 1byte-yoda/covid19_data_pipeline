@@ -10,7 +10,7 @@ SCHEMA="covid19"
 mc alias set $DST_ALIAS http://"$MINIO_ENDPOINT_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
 mc alias set $SRC_ALIAS https://s3-ap-southeast-1.amazonaws.com "" ""
 
-datasets=("covid19datahub" "github_csse_daily")
+datasets=("covid19datahub" "github_csse_daily" "static")
 
 echo "Downloading ${datasets[@]}"
 

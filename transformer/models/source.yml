@@ -13,8 +13,8 @@ sources:
         meta:
           dagster:
             asset_key: [covid19datahub]
-  - name: csv_source
+  - name: static_source
     meta:
-      external_location: "{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/google_geolocation/{name}.csv"
+      external_location: "{{ env_var('DESTINATION__FILESYSTEM__BUCKET_URL') }}/covid19/static/{name}.csv"
     tables:
-      - name: location_coordinates
+      - name: country_mapping

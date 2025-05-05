@@ -14,6 +14,7 @@ RUN curl -O https://dl.min.io/client/mc/release/linux-amd64/mc && \
 
 COPY ./docker/dagster/init_assets.sh /init_assets.sh
 COPY ./docker/dagster/create_deltalake.py /create_deltalake.py
+COPY ./data/country_mapping.csv /data/country_mapping.csv
 
 RUN chmod +x /init_assets.sh
 

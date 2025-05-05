@@ -61,13 +61,26 @@ WITH github_covid_locations AS (
         ON cl.location_id = ccd.location_id
 )
 
+,static_country_map AS (
+    SELECT
+        country
+        ,iso2
+        ,iso3
+        ,continent
+    FROM {{ source('static_source', 'country_mapping') }}
+)
+
 SELECT
     location_id
-    ,{{ title_case('country') }} AS country
-    ,{{ title_case('state') }} AS state
-    ,{{ title_case('city') }} AS city
-    ,administrative_area_level
-    ,latitude
-    ,longitude
-    ,population
-FROM location_combined
+    ,{{ title_case('lc.country') }} AS country
+    ,{{ title_case('lc.state') }} AS state
+    ,{{ title_case('lc.city') }} AS city
+    ,lc.administrative_area_level
+    ,lc.latitude
+    ,lc.longitude
+    ,lc.population
+    ,sc.continent
+    ,sc.iso2
+    ,sc.iso3
+FROM location_combined lc
+LEFT JOIN static_country_map sc ON LOWER(sc.country) = LOWER(lc.country)

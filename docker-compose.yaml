@@ -7,7 +7,6 @@ services:
     container_name: minio
     env_file: .env
     restart: always
-
     volumes: [./data/minio/data:/data]
     ports:
       - "9050:9000"

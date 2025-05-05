@@ -1,0 +1,249 @@
+country,iso2,iso3,continent
+India,IN,IND,Asia
+Japan,JP,JPN,Asia
+Pakistan,PK,PAK,Asia
+Thailand,TH,THA,Asia
+Switzerland,CH,CHE,Europe
+Cabo Verde,CV,CPV,Africa
+Grenada,GD,GRD,America
+Ireland,IE,IRL,Europe
+Haiti,HT,HTI,America
+Somalia,SO,SOM,Africa
+Bangladesh,BD,BGD,Asia
+Réunion,RE,REU,Africa
+Uzbekistan,UZ,UZB,Asia
+Senegal,SN,SEN,Africa
+Syria,SY,SYR,Asia
+Montenegro,ME,MNE,Europe
+Slovenia,SI,SVN,Europe
+Pitcairn,PN,PCN,Oceania
+Iraq,IQ,IRQ,Asia
+Iran,IR,IRN,Asia
+Russian Federation,RU,RUS,Europe
+Colombia,CO,COL,America
+South Africa,ZA,ZAF,Africa
+Gibraltar,GI,GIB,Europe
+Puerto Rico,PR,PRI,America
+Cook Islands,CK,COK,Oceania
+Niue,NU,NIU,Oceania
+Botswana,BW,BWA,Africa
+China,CN,CHN,Asia
+South Sudan,SS,SSD,Africa
+Malawi,MW,MWI,Africa
+Niger,NE,NER,Africa
+Myanmar,MM,MMR,Asia
+Isle Of Man,IM,IMN,Europe
+Saint Martin,MF,MAF,America
+Russia,RU,RUS,Europe
+Burkina Faso,BF,BFA,Africa
+Argentina,AR,ARG,America
+Lithuania,LT,LTU,Europe
+Sweden,SE,SWE,Europe
+Bahamas,BS,BHS,America
+"Bonaire, Sint Eustatius",BQ,BES,America
+"Congo, The Democratic",CD,COD,Africa
+Micronesia,FM,FSM,Oceania
+Mayotte,YT,MYT,Africa
+Guam,GU,GUM,Oceania
+South Korea,KR,KOR,Asia
+Bhutan,BT,BTN,Asia
+Tonga,TO,TON,Oceania
+Mali,ML,MLI,Africa
+Guyana,GY,GUY,America
+Bosnia And Herzegovina,BA,BIH,Europe
+Kuwait,KW,KWT,Asia
+Laos,LA,LAO,Asia
+Rwanda,RW,RWA,Africa
+Bulgaria,BG,BGR,Europe
+Democratic Republic of the Congo,CD,COD,Africa
+Republic of the Congo,CG,COG,Africa
+Eswatini,SZ,SWZ,Africa
+Sao Tome And,ST,STP,Africa
+Estonia,EE,EST,Europe
+Libya,LY,LBY,Africa
+Swaziland,SZ,SWZ,Africa
+Andorra,AD,AND,Europe
+Bahrain,BH,BHR,Asia
+Papua New Guinea,PG,PNG,Oceania
+Panama,PA,PAN,America
+Guinea-bissau,GW,GNB,Africa
+Mauritius,MU,MUS,Africa
+Cayman Islands,KY,CYM,America
+Qatar,QA,QAT,Asia
+Vatican City,VA,VAT,Europe
+Ukraine,UA,UKR,Europe
+Dominica,DM,DMA,America
+Poland,PL,POL,Europe
+Marshall Islands,MH,MHL,Oceania
+"Virgin Islands, British",VG,VGB,America
+Kenya,KE,KEN,Africa
+Greenland,GL,GRL,America
+Mongolia,MN,MNG,Asia
+Egypt,EG,EGY,Africa
+Zimbabwe,ZW,ZWE,Africa
+Ivory Coast,CI,CIV,Africa
+Northern Mariana Islands,MP,MNP,Oceania
+Singapore,SG,SGP,Asia
+"Saint Helena, Ascension",SH,SHN,Africa
+Cyprus,CY,CYP,Asia
+Peru,PE,PER,America
+Uganda,UG,UGA,Africa
+Ecuador,EC,ECU,America
+Luxembourg,LU,LUX,Europe
+Paraguay,PY,PRY,America
+United Arab Emirates,AE,ARE,Asia
+Lebanon,LB,LBN,Asia
+Kazakhstan,KZ,KAZ,Asia
+Slovakia,SK,SVK,Europe
+Turkmenistan,TM,TKM,Asia
+French Polynesia,PF,PYF,Oceania
+Norway,NO,NOR,Europe
+Kosovo,XK,XKX,Europe
+Solomon Islands,SB,SLB,Oceania
+Vietnam,VN,VNM,Asia
+Oman,OM,OMN,Asia
+Algeria,DZ,DZA,Africa
+French Guiana,GF,GUF,America
+Austria,AT,AUT,Europe
+Belgium,BE,BEL,Europe
+"Virgin Islands, U.s.",VI,VIR,America
+Djibouti,DJ,DJI,Africa
+Kiribati,KI,KIR,Oceania
+Lesotho,LS,LSO,Africa
+Saint Lucia,LC,LCA,America
+Guatemala,GT,GTM,America
+Dominican Republic,DO,DOM,America
+El Salvador,SV,SLV,America
+Palestine,PS,PSE,Asia
+Palau,PW,PLW,Oceania
+Ethiopia,ET,ETH,Africa
+Tajikistan,TJ,TJK,Asia
+Canada,CA,CAN,America
+Saint Kitts And,KN,KNA,America
+American Samoa,AS,ASM,Oceania
+Sudan,SD,SDN,Africa
+Comoros,KM,COM,Africa
+Benin,BJ,BEN,Africa
+Seychelles,SC,SYC,Africa
+Martinique,MQ,MTQ,America
+Bermuda,BM,BMU,America
+Turks And Caicos,TC,TCA,America
+Reunion,RE,REU,Africa
+Cameroon,CM,CMR,Africa
+Tuvalu,TV,TUV,Oceania
+Cuba,CU,CUB,America
+Serbia,RS,SRB,Europe
+Samoa,WS,WSM,Oceania
+Philippines,PH,PHL,Asia
+Mauritania,MR,MRT,Africa
+Angola,AO,AGO,Africa
+Liechtenstein,LI,LIE,Europe
+New Zealand,NZ,NZL,Oceania
+Anguilla,AI,AIA,America
+Indonesia,ID,IDN,Asia
+Antarctica,AQ,ATA,Antarctica
+Afghanistan,AF,AFG,Asia
+Czech Republic,CZ,CZE,Europe
+Zambia,ZM,ZMB,Africa
+Falkland Islands (malvinas),FK,FLK,America
+Cambodia,KH,KHM,Asia
+Hong Kong,HK,HKG,Asia
+Georgia,GE,GEO,Asia
+Greece,GR,GRC,Europe
+Mozambique,MZ,MOZ,Africa
+Antigua And Barbuda,AG,ATG,America
+Sierra Leone,SL,SLE,Africa
+Tunisia,TN,TUN,Africa
+Nigeria,NG,NGA,Africa
+Jersey,JE,JEY,Europe
+Croatia,HR,HRV,Europe
+Guernsey,GG,GGY,Europe
+Latvia,LV,LVA,Europe
+Brunei,BN,BRN,Asia
+Montserrat,MS,MSR,America
+Turkey,TR,TUR,Asia
+Malaysia,MY,MYS,Asia
+Sint Maarten,SX,SXM,America
+Aruba,AW,ABW,America
+Kyrgyzstan,KG,KGZ,Asia
+Barbados,BB,BRB,America
+Timor-leste,TL,TLS,Asia
+Tanzania,TZ,TZA,Africa
+Uruguay,UY,URY,America
+Sri Lanka,LK,LKA,Asia
+Romania,RO,ROU,Europe
+North Korea,KP,PRK,Asia
+East Timor,TL,TLS,Asia
+Chile,CL,CHL,America
+Jamaica,JM,JAM,America
+Finland,FI,FIN,Europe
+Israel,IL,ISR,Asia
+Jordan,JO,JOR,Asia
+Holy See,VA,VAT,Europe
+Gabon,GA,GAB,Africa
+Eritrea,ER,ERI,Africa
+Azerbaijan,AZ,AZE,Asia
+Tokelau,TK,TKL,Oceania
+United States,US,USA,America
+Central African Republic,CF,CAF,Africa
+Mexico,MX,MEX,America
+Australia,AU,AUS,Oceania
+Denmark,DK,DNK,Europe
+Malta,MT,MLT,Europe
+Wallis And Futuna,WF,WLF,Oceania
+Portugal,PT,PRT,Europe
+Morocco,MA,MAR,Africa
+Iceland,IS,ISL,Europe
+Burundi,BI,BDI,Africa
+Belarus,BY,BLR,Europe
+Saint Barthelemy,BL,BLM,America
+Spain,ES,ESP,Europe
+Germany,DE,DEU,Europe
+Netherlands,NL,NLD,Europe
+Guinea,GN,GIN,Africa
+Armenia,AM,ARM,Asia
+Equatorial Guinea,GQ,GNQ,Africa
+Moldova,MD,MDA,Europe
+Belize,BZ,BLZ,America
+Yemen,YE,YEM,Asia
+New Caledonia,NC,NCL,Oceania
+Trinidad And Tobago,TT,TTO,America
+Venezuela,VE,VEN,America
+Vanuatu,VU,VUT,Oceania
+Albania,AL,ALB,Europe
+Togo,TG,TGO,Africa
+Namibia,NA,NAM,Africa
+Liberia,LR,LBR,Africa
+Fiji,FJ,FJI,Oceania
+Nauru,NR,NRU,Oceania
+Maldives,MV,MDV,Asia
+Italy,IT,ITA,Europe
+France,FR,FRA,Europe
+Ghana,GH,GHA,Africa
+Gambia,GM,GMB,Africa
+Bolivia,BO,BOL,America
+Saudi Arabia,SA,SAU,Asia
+Chad,TD,TCD,Africa
+Saint Vincent And,VC,VCT,America
+Suriname,SR,SUR,America
+Nicaragua,NI,NIC,America
+Faroe Islands,FO,FRO,Europe
+Monaco,MC,MCO,Europe
+Nepal,NP,NPL,Asia
+Brazil,BR,BRA,America
+United Kingdom,GB,GBR,Europe
+Taiwan,TW,TWN,Asia
+North Macedonia,MK,MKD,Europe
+Honduras,HN,HND,America
+San Marino,SM,SMR,Europe
+Madagascar,MG,MDG,Africa
+Hungary,HU,HUN,Europe
+Costa Rica,CR,CRI,America
+Macau,MO,MAC,Asia
+Curacao,CW,CUW,America
+Sao tome and principe,ST,STP,Africa
+"Saint helena, ascension and tristan da cunha",SH,SHN,Africa
+"Bonaire, sint eustatius and saba",BQ,BES,America
+Saint kitts and nevis,KN,KNA,America
+Saint vincent and the grenadines,VC,VCT,America
+Turks and caicos islands,TC,TCA,America
