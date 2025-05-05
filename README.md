@@ -64,7 +64,7 @@ Below, we will define the focus area of our analysis to centralize the scope our
 6. Top 10 Countries with most daily tests and hospitalizations?
 7. What are the most fully vaccinated countries with respect to their population?
 8. What are the effects of government policies to COVID19 deaths / recovered / confirmed cases?
-9. Is there a positive effect on the likelihood of getting infected for those countries wearing a face mask?
+9. Is there a positive effect on the likelihood of getting infected for those countries who have stricter face mask policies?
 
 ---
 ## Technology Architecture
