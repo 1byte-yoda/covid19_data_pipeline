@@ -1,12 +1,13 @@
 ---
 services:
   minio:
-    image: minio/minio:latest
+    build:
+      context: .
+      dockerfile: ./docker/minio/Dockerfile
     container_name: minio
     env_file: .env
     restart: always
-    command: server --console-address ":9001" /data
-    hostname: minio
+
     volumes: [./data/minio/data:/data]
     ports:
       - "9050:9000"
