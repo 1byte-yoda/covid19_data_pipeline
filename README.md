@@ -89,32 +89,32 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
     <tr>
       <td>Dagster</td>
       <td>Orchestration framework</td>
-      <td>Was chosen over Airflow/Mage due to its modular and typed nature -- that gives a better local development UX; Offers open-source integration with Modern Data Stack, strong pipeline monitoring and metadata handling, supports Dagster Cloud for production scalability.</td>
+      <td>Was chosen over Airflow/Mage due to its modular and typed Python Based orchestration framework which offers better local development UX. Offers open source support for Modern data stack integration which makes it easy to maintain. Good pipeline monitoring for easier pipeline maintenance, and metadata handling for data lineage and data observability. Offers Dagster Cloud for reliable and scalable Production workloads</td>
     </tr>
     <tr>
       <td>DBT for transformation</td>
       <td>SQL-based transformation wrapper</td>
-      <td>Supports version control, documentation, model dependency graphs, easy database object handling, integrates with Dagster and CI/CD for testing and reliability.</td>
+      <td>The T in ELT. Wrapper for SQL based transformations. It enables version control, documentation, and model dependency graphs which also has a plugin for dagster. Handles the database object creation for you, just write your SQL transformation. Also offers data testing which could be integrated with CICDs to ensure data correctness and reliability.</td>
     </tr>
     <tr>
       <td>DuckDB</td>
       <td>Data Processing / Storage</td>
-      <td>In-memory SQL engine (the T in ELT). Lightweight, fast setup, supports DeltaLake integration, easily swappable with MotherDuck for scalability.</td>
+      <td>Easy to set up/lightweight in-memory database - which makes it faster than the typical SQL databases. It supports reading/writing data from various systems like DeltaLakes. Can be easily swap with MotherDuck for a more scalable production workload.</td>
     </tr>
     <tr>
       <td>MinIO for Datalake</td>
       <td>Object storage</td>
-      <td>Open-source, S3-compatible, Docker-compatible for seamless local and production environment use. (the storage for L in ELT)</td>
+      <td>The L storage in ELT. Open source datalake which supports AWS S3. Docker compatible which makes it Portable between local development and production.</td>
     </tr>
     <tr>
       <td>DLT</td>
       <td>Data ingestion </td>
-      <td>Python-based tool supporting various sources/destinations with good metadata tracking for ingestion jobs. (the E in ELT)</td>
+      <td>The E in ELT. Python based data ingestion tool which has support for various sources / destinations. Offers good job metadata management to track ingestion loads.</td>
     </tr>
     <tr>
       <td>Delta File Format</td>
       <td>Columnar data storage</td>
-      <td>Used with DLT for storing in S3 using Parquet, supports schema evolution and analytics use cases well.</td>
+      <td>Used alongside DLT to store the ingested data into S3. It is using Parquet behind the curtain for columnar storage which is good for our Analytics Use Case. It offers a good integration with DLT which makes it easy to operate. It is also schema Evolution ready that enables the system to be more robust to upstream schema changes</td>
     </tr>
     <tr>
       <td>Docker Compose</td>
@@ -124,17 +124,17 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
     <tr>
       <td>Apache Superset</td>
       <td>Business Intelligence Visualization Tool</td>
-      <td>Modern data stack compatible, supports dimensional models, self-service analytics, drag-and-drop interface, access control for governance.</td>
+      <td>Modern data stack compatible. It has compatibility with Dimensional Model type of data that makes it suitable for slicing and dicing of BI data to generate reports. Offers wide range of chart types. While it offers a UI based data aggregation through drag and drop, it also offers a flexibility of transforming your data before visualizing it... this aspect is useful especially for a self-service analytics use case. It also has a built-in user access control feature which is ideal for data governance implementation.</td>
     </tr>
     <tr>
       <td>Star Schema</td>
       <td>Analytics Data Model</td>
-      <td>Balances storage, usability, and performance; denormalized structure reduces joins, ideal for read-heavy workloads.</td>
+      <td>A dimensional model which is composed of facts and dimension tables. This data model brings the balance between storage efficiency - just right amount of redundancy, usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling. This is perfect for our use case since our data platform will do more reading than writing.</td>
     </tr>
     <tr>
       <td>Medallion Architecture</td>
       <td>Data quality layering</td>
-      <td>Defines raw, cleansed, and curated layers; improves maintainability via separation of concerns.</td>
+      <td>The architecture I used to establish an increasing level of data quality in the data pipeline represented by raw, cleansed, and curated layers. This promotes separation of concern which adds up to the project maintainability.</td>
     </tr>
   </tbody>
 </table>
