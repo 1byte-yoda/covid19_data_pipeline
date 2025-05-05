@@ -4,7 +4,6 @@ from datetime import datetime
 from dagster_dbt import DbtCliResource, dbt_assets
 from dagster import AssetExecutionContext
 from ..project import covid19_dbt_project
-
 from . import daily_partitions, CustomDagsterDbtTranslator
 
 
