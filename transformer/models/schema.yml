@@ -318,25 +318,25 @@ models:
           - not_null
       - name: incident_rate
         description: Incidence Rate calculated as cases per 100,000 persons.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: case_fatality_ratio
         description: Case-Fatality Ratio (%) calculated as number of recorded deaths
           divided by number of recorded cases.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: confirmed
         description: Total confirmed and probable cases where reported.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: deaths
         description: Total confirmed and probable deaths where reported.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: recovered
         description: Estimated number of recovered cases based on local media and
           state/local reporting. May be substantially lower than actual values.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: active
         description: Active cases calculated as total cases minus recovered and deaths.
           This is a reference-only value after reporting of recovered cases ceased.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
   - name: fact_covid_hospitalization
     description: >
       This table contains Daily COVID-19 hospitalization metrics, including counts
@@ -367,15 +367,15 @@ models:
           - not_null
       - name: hosp
         description: Number of hospitalized patients on the reported date.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: icu
         description: Number of hospitalized patients in intensive therapy (ICU) on
           the reported date.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: vent
         description: Number of patients requiring invasive mechanical ventilation
           on the reported date.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
   - name: fact_covid_tests
     description: >
       This table contains daily COVID-19 testing and vaccination data. It includes
@@ -405,18 +405,18 @@ models:
               field: location_id
       - name: tests
         description: Daily number of COVID-19 tests conducted.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: vaccines
         description: Daily number of total vaccine doses administered.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: people_vaccinated
         description: Daily number of people who received at least one vaccine
           dose.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
       - name: people_fully_vaccinated
         description: Daily number of people who received all doses prescribed
           by the vaccination protocol.
-        tests: [ not_null ]
+        tests: [ not_null, positive_value ]
   - name: fact_covid_policy_measures
     description: This model includes various government response indicators for Covid-19,
       with categorical encodings and their corresponding meanings.
