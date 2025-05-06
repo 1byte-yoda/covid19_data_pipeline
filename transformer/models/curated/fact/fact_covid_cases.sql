@@ -102,4 +102,5 @@ WITH covid_cases AS (
 )
 
 SELECT *
+     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM recalculated_case_fatality_and_incident_rate

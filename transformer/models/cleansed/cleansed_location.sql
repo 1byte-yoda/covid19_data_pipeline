@@ -51,6 +51,7 @@ WITH raw_location_cleansed AS (
 )
 
 SELECT *
+     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM final_location
 WHERE
     1 = 1

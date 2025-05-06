@@ -53,5 +53,6 @@ WITH covid_tests AS (
 SELECT
     ROW_NUMBER() OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS row_num
     ,*
+    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM new_covid_tests_with_id
 QUALIFY row_num = 1

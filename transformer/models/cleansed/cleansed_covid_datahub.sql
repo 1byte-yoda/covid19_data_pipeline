@@ -65,6 +65,7 @@ SELECT
         ELSE country
     END AS combined_key
     ,* EXCLUDE (low_country,low_state,low_city,country,state,city)
+    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM covid_datahub
 WHERE
     1 = 1

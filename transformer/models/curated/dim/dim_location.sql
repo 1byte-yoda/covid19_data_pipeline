@@ -82,5 +82,6 @@ SELECT
     ,sc.continent
     ,sc.iso2
     ,sc.iso3
+    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM location_combined lc
 LEFT JOIN static_country_map sc ON LOWER(sc.country) = LOWER(lc.country)

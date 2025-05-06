@@ -22,6 +22,7 @@ WITH covid19 AS (
 )
 
 SELECT *
+     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM covid19
 WHERE
     1 = 1

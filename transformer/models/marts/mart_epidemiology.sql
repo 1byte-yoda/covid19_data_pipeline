@@ -44,6 +44,7 @@ SELECT DISTINCT
     ,f4.vaccines
     ,f4.people_vaccinated
     ,f4.people_fully_vaccinated
+    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM {{ ref('fact_covid_cases') }} AS f1
 INNER JOIN {{ ref('dim_location') }} AS dl ON f1.location_id = dl.location_id
 INNER JOIN {{ ref('dim_date') }} AS dd ON f1.date_id = dd.date_id

@@ -19,4 +19,5 @@ SELECT
     ,CAST(YEAR(date_value) || QUARTER(date_value) AS INT) AS quarter_key
     ,QUARTER(date_value) AS quarter_of_year
     ,CAST(YEAR(date_value) AS INT) AS year_key
+    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM generate_date
