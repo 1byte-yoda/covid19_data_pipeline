@@ -20,7 +20,7 @@
       <a href="#design-decisions">Design Decisions</a>
     </li>
     <li>
-      <a href="#covid19-global-pandemic-dashboard">COVID19 Global Pandemic Dashboard</a>
+      <a href="#covid19-global-pandemic-dashboard-samples">COVID19 Global Pandemic Dashboard</a>
     </li>
     <li>
       <a href="#setup-instructions">Setup Instructions</a>
@@ -141,8 +141,13 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
 
 
 ---
-## COVID19 Global Pandemic Dashboard
-![mds](img/superset-dashboard.png)
+## COVID19 Global Pandemic Dashboard Samples
+### Covid Cases Dashboard
+![mds](img/covid_cases_snapshot.png)
+
+---
+### Covid Hospitalization Dashboard
+![mds](img/covid_hospitalization_snapshot.png)
 
 ---
 ## Setup Instructions
