@@ -50,8 +50,9 @@ WITH raw_location_cleansed AS (
     FROM cleansed_location
 )
 
-SELECT *
-     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
+SELECT
+    *
+    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM final_location
 WHERE
     1 = 1

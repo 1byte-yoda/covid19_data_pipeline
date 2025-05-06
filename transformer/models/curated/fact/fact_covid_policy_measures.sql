@@ -99,5 +99,5 @@ WITH covid_tests AS (
 SELECT
     {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
     ,*
-    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
+    ,now() AT TIME ZONE 'UTC' AS inserted_at
 FROM forward_filled

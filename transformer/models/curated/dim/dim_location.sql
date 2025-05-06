@@ -71,7 +71,7 @@ WITH github_covid_locations AS (
 )
 
 SELECT
-    location_id
+    lc.location_id
     ,{{ title_case('lc.country') }} AS country
     ,{{ title_case('lc.state') }} AS state
     ,{{ title_case('lc.city') }} AS city
@@ -83,5 +83,5 @@ SELECT
     ,sc.iso2
     ,sc.iso3
     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
-FROM location_combined lc
-LEFT JOIN static_country_map sc ON LOWER(sc.country) = LOWER(lc.country)
+FROM location_combined AS lc
+LEFT JOIN static_country_map AS sc ON LOWER(sc.country) = LOWER(lc.country)

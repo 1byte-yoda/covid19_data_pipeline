@@ -46,13 +46,17 @@ WITH covid_tests AS (
         ,CASE WHEN prev_tests < tests THEN tests - prev_tests ELSE 0 END AS tests
         ,CASE WHEN prev_vaccines < vaccines THEN vaccines - prev_vaccines ELSE 0 END AS vaccines
         ,CASE WHEN prev_people_vaccinated < people_vaccinated THEN people_vaccinated - prev_people_vaccinated ELSE 0 END AS people_vaccinated
-        ,CASE WHEN prev_people_fully_vaccinated < people_fully_vaccinated THEN people_fully_vaccinated - prev_people_fully_vaccinated ELSE 0 END AS people_fully_vaccinated
+        ,CASE WHEN prev_people_fully_vaccinated < people_fully_vaccinated THEN people_fully_vaccinated - prev_people_fully_vaccinated ELSE 0 END
+            AS people_fully_vaccinated
     FROM covid_with_prev_tests
 )
 
 SELECT
-    ROW_NUMBER() OVER(PARTITION BY covid_id ORDER BY date_id DESC) AS row_num
-    ,*
-    ,NOW() AT TIME ZONE 'UTC' AS inserted_at
+    *
+    ,row_number() OVER (
+        PARTITION BY covid_id
+        ORDER BY date_id DESC
+    ) AS row_num
+    ,now() AT TIME ZONE 'UTC' AS inserted_at
 FROM new_covid_tests_with_id
 QUALIFY row_num = 1
