@@ -20,6 +20,9 @@
       <a href="#design-decisions">Design Decisions</a>
     </li>
     <li>
+      <a href="#dimensional-data-model">Dimensional Data Model</a>
+    </li>
+    <li>
       <a href="#covid19-global-pandemic-dashboard-samples">COVID19 Global Pandemic Dashboard</a>
     </li>
     <li>
@@ -139,6 +142,8 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
   </tbody>
 </table>
 
+## Dimensional Data Model
+![mds](img/star_schema.png)
 
 ---
 ## COVID19 Global Pandemic Dashboard Samples
