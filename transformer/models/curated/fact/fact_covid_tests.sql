@@ -20,6 +20,7 @@ WITH covid_tests AS (
         ,t.vaccines
         ,t.people_vaccinated
         ,t.people_fully_vaccinated
+        ,t.date
     FROM {{ ref('cleansed_covid_datahub') }} AS t
     WHERE
         1 = 1
@@ -33,19 +34,19 @@ WITH covid_tests AS (
         *
         ,lag(tests) OVER (
             PARTITION BY location_id
-            ORDER BY date_id
+            ORDER BY date
         ) AS prev_tests
         ,lag(vaccines) OVER (
             PARTITION BY location_id
-            ORDER BY date_id
+            ORDER BY date
         ) AS prev_vaccines
         ,lag(people_vaccinated) OVER (
             PARTITION BY location_id
-            ORDER BY date_id
+            ORDER BY date
         ) AS prev_people_vaccinated
         ,lag(people_fully_vaccinated) OVER (
             PARTITION BY location_id
-            ORDER BY date_id
+            ORDER BY date
         ) AS prev_people_fully_vaccinated
     FROM covid_tests
 )
@@ -55,6 +56,7 @@ WITH covid_tests AS (
         {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
         ,location_id
         ,date_id
+        ,date
 
         -- Automatically Correct Cumulative Values where older cases is always lower than present cases
         ,CASE WHEN prev_tests < tests THEN tests - prev_tests ELSE 0 END AS tests
@@ -66,10 +68,10 @@ WITH covid_tests AS (
 )
 
 SELECT
-    *
+    * EXCLUDE(date)
     ,row_number() OVER (
         PARTITION BY covid_id
-        ORDER BY date_id DESC
+        ORDER BY date DESC
     ) AS row_num
     ,now() AT TIME ZONE 'UTC' AS inserted_at
 FROM new_covid_tests_with_id

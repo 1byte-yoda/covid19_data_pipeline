@@ -75,3 +75,18 @@ services:
       - ./pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: ./docker/jupyter/Dockerfile
+    container_name: jupyter
+    env_file: .env
+    volumes:
+      - ./adhoc:/home/jovyan/work
+      - ./data/duckdb:/data/duckdb
+    ports:
+      - "8888:8888"
+    depends_on:
+      minio:
+        condition: service_started
