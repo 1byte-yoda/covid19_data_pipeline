@@ -1,4 +1,16 @@
 {{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model computes the **daily number of COVID-19 tests and vaccinations**
+--     from cumulative totals. It:
+--     1. Extracts distinct cumulative metrics from `cleansed_covid_datahub`.
+--     2. Computes lag values to identify previous day's totals by location.
+--     3. Derives daily deltas using conditional logic to ensure only increasing values
+--        are considered (handling data corrections or missing values gracefully).
+--     4. Generates a surrogate key (`covid_id`) using `location_id` and `date_id`.
+--     5. Implements an incremental strategy using `min_date` and `max_date` filters.
+--     6. Deduplicates using `row_number()` to return only the latest record per key.
+-- -----------------------------------------------------------------------------
 
 WITH covid_tests AS (
     SELECT DISTINCT
@@ -43,6 +55,8 @@ WITH covid_tests AS (
         {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
         ,location_id
         ,date_id
+
+        -- Automatically Correct Cumulative Values where older cases is always lower than present cases
         ,CASE WHEN prev_tests < tests THEN tests - prev_tests ELSE 0 END AS tests
         ,CASE WHEN prev_vaccines < vaccines THEN vaccines - prev_vaccines ELSE 0 END AS vaccines
         ,CASE WHEN prev_people_vaccinated < people_vaccinated THEN people_vaccinated - prev_people_vaccinated ELSE 0 END AS people_vaccinated

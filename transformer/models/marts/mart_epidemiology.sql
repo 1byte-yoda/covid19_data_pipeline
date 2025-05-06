@@ -1,4 +1,18 @@
 {{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model produces a comprehensive fact table that consolidates:
+--     - COVID-19 case metrics (confirmed, deaths, recovered, etc.)
+--     - Hospitalization data (hospitalized, ICU, ventilated)
+--     - Policy measures (school closures, mask mandates, etc.)
+--     - Testing and vaccination daily deltas
+--     - Location metadata (country, state, city, ISO codes, population, etc.)
+--     - Date metadata (calendar attributes like month, quarter, year)
+--
+--     This table serves as the primary analytical layer for our BI tool,
+--     joining all the covid fact tables and dimensions.
+-- -----------------------------------------------------------------------------
+
 SELECT DISTINCT
     f1.covid_id
     ,dd.date_id AS date_key

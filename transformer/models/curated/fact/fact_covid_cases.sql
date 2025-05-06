@@ -1,4 +1,14 @@
 {{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model processes COVID-19 case data at the daily level by:
+--     1. Joining cleansed case records with location metadata.
+--     2. Generating a surrogate `covid_id` from `location_id` and `date_id`.
+--     3. Deduplicating records based on the most recent data per location-date.
+--     4. Computing daily deltas for confirmed, deaths, recovered, and active cases.
+--     5. Recalculating incident rate and case fatality ratio for accuracy.
+--     6. Supporting incremental loads via `min_date` and `max_date`.
+-- -----------------------------------------------------------------------------
 
 WITH covid_cases AS (
     SELECT
@@ -10,6 +20,8 @@ WITH covid_cases AS (
         ,t.incident_rate
         ,t.case_fatality_ratio
         ,t.last_update
+        ,strftime(t.last_update::DATE,'%Y%m%d')::INT AS date_id
+        ,t.confirmed * 100000 / t.incident_rate AS population
     FROM {{ ref('cleansed_github_csse_daily') }} AS t
     INNER JOIN {{ ref('cleansed_location') }} AS cl ON t.id = cl.id
     WHERE
@@ -19,27 +31,15 @@ WITH covid_cases AS (
         {% endif %}
 )
 
-,covid_cases_with_date_id AS (
-    SELECT DISTINCT
-        t.location_id
-        ,t.confirmed
-        ,t.deaths
-        ,t.recovered
-        ,t.active
-        ,t.incident_rate
-        ,t.case_fatality_ratio
-        ,strftime(t.last_update::DATE,'%Y%m%d')::INT AS date_id
-    FROM covid_cases AS t
-)
-
 ,covid_cases_with_sk AS (
     SELECT
+        -- Generate the covid_id from the location_id and date_id fields
         {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
         ,*
-    FROM covid_cases_with_date_id
+    FROM covid_cases
 )
 
-,unique_covid_cases AS (
+,deduped_covid_cases AS (
     SELECT
         covid_id
         ,location_id
@@ -50,7 +50,7 @@ WITH covid_cases AS (
         ,incident_rate
         ,case_fatality_ratio
         ,date_id
-        ,confirmed * 100000 / incident_rate AS population
+        ,population
         ,row_number() OVER (
             PARTITION BY covid_id
             ORDER BY date_id DESC
@@ -78,7 +78,7 @@ WITH covid_cases AS (
             PARTITION BY location_id
             ORDER BY date_id
         ) AS prev_active
-    FROM unique_covid_cases
+    FROM deduped_covid_cases
 )
 
 ,new_covid_cases AS (
@@ -89,6 +89,8 @@ WITH covid_cases AS (
         ,incident_rate
         ,case_fatality_ratio
         ,population
+
+        -- Automatically Correct Cumulative Values where older cases is always lower than present cases
         ,CASE WHEN prev_confirmed < confirmed THEN confirmed - prev_confirmed ELSE 0 END AS confirmed
         ,CASE WHEN prev_deaths < deaths THEN deaths - prev_deaths ELSE 0 END AS deaths
         ,CASE WHEN prev_recovered < recovered THEN recovered - prev_recovered ELSE 0 END AS recovered

@@ -1,4 +1,13 @@
 {{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model processes COVID-19 hospitalization data by:
+--     1. Selecting distinct daily records of hospitalization, ICU, and ventilator usage.
+--     2. Generating a surrogate `covid_id` using `location_id` and `date_id`.
+--     3. Filling null values with zeros for numerical stability.
+--     4. Deduplicating to retain the latest record per location and date.
+--     5. Supporting incremental strategy using `min_date` and `max_date` filters.
+-- -----------------------------------------------------------------------------
 
 WITH covid_hosp AS (
     SELECT DISTINCT

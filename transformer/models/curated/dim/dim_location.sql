@@ -1,6 +1,18 @@
 {{ config(unique_key='location_id', incremental_strategy="delete+insert") }}
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model produces a unified, deduplicated, and enriched geographic
+--     location dimension for COVID-19 analytics by:
+--     1. De-duplicating location records from GitHub and DataHub sources based on
+--        the latest `last_update` and `date` values respectively.
+--     2. Merging both sources using a full outer join on `location_id`.
+--     3. Filling in missing geographic and demographic data using COALESCE.
+--     4. Joining with a static country mapping source to append ISO codes and
+--        continent information.
+--     5. Supporting incremental loads using `min_date` and `max_date` filters.
+-- -----------------------------------------------------------------------------
 
-WITH github_covid_locations AS (
+WITH deduped_github_covid_locations AS (
     SELECT DISTINCT
         cl.location_id
         ,cl.country
@@ -23,7 +35,7 @@ WITH github_covid_locations AS (
     QUALIFY row_num = 1
 )
 
-,datahub_covid_location AS (
+,deduped_datahub_covid_location AS (
     SELECT DISTINCT
         ccd.location_id
         ,ccd.country
@@ -56,8 +68,8 @@ WITH github_covid_locations AS (
         ,COALESCE(ccd.city,cl.city) AS city
         ,COALESCE(ccd.administrative_area_level,cl.administrative_area_level) AS administrative_area_level
         ,COALESCE(ccd.population,0) AS population
-    FROM github_covid_locations AS cl
-    FULL OUTER JOIN datahub_covid_location AS ccd
+    FROM deduped_github_covid_locations AS cl
+    FULL OUTER JOIN deduped_datahub_covid_location AS ccd
         ON cl.location_id = ccd.location_id
 )
 
@@ -79,9 +91,9 @@ SELECT
     ,lc.latitude
     ,lc.longitude
     ,lc.population
-    ,sc.continent
-    ,sc.iso2
-    ,sc.iso3
+    ,COALESCE(sc.continent,'Unassigned') AS continent
+    ,COALESCE(sc.iso2,'Unassigned') AS iso2
+    ,COALESCE(sc.iso3,'Unassigned') AS iso3
     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
 FROM location_combined AS lc
 LEFT JOIN static_country_map AS sc ON LOWER(sc.country) = LOWER(lc.country)

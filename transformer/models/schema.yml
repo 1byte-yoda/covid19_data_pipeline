@@ -61,6 +61,8 @@ models:
       - name: day
         description: Day part of the ingestion date.
         tests: [not_null]
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
   - name: cleansed_covid_datahub
     description: Standardized and cleaned Covid-19 dataset with policy responses,
       epidemiological data, testing, and hospitalization metrics.
@@ -225,6 +227,8 @@ models:
         tests:
           - accepted_values:
               values: [-3, -2, -1, 0, 1, 2, 3]
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
 
       # Indexes
       - name: stringency_index
@@ -251,6 +255,8 @@ models:
               min_value: 0
               max_value: 100
               inclusive: true
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
 
       # Epidemiology
       - name: confirmed
@@ -263,6 +269,8 @@ models:
         description: Recoveries.
         tests:
           - positive_value
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
 
       # Tests
       - name: tests
@@ -278,6 +286,8 @@ models:
         description: Number of people fully vaccinated.
         tests:
           - positive_value
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
 
       # Hospitalization
       - name: hosp
@@ -289,6 +299,55 @@ models:
       - name: vent
         description: Patients on ventilators.
         tests: [positive_value]
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
+  - name: cleansed_location
+    description: |
+      This dbt model standardizes and enriches location-related metadata from the raw COVID-19 location dataset
+    columns:
+      - name: id
+        description: Primary key of the raw location record
+        tests:
+          - unique
+          - not_null
+      - name: location_id
+        description: Surrogate key generated from standardized and normalized location fields
+        tests:
+          - not_null
+      - name: country
+        description: Cleaned country name
+        tests:
+          - not_null
+      - name: state
+        description: Cleaned state name
+        tests:
+          - not_null
+      - name: city
+        description: Cleaned city name or 'Unassigned'
+        tests:
+          - not_null
+      - name: latitude
+        description: Resolved latitude value from multiple fields
+        tests:
+          - not_null
+      - name: longitude
+        description: Resolved longitude value from multiple fields
+        tests:
+          - not_null
+      - name: administrative_area_level
+        description: Granularity of the location record (1 = country, 2 = state, 3 = city)
+        tests:
+          - not_null
+      - name: combined_key
+        description: Cleaned location hierarchy key generated from country, state, and city
+        tests:
+          - not_null
+      - name: last_update
+        description: Parsed timestamp of the most recent update in the source dataset
+        tests:
+          - not_null
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
 
   ########################################################
   #                        CURATED                       #
@@ -589,6 +648,58 @@ models:
         description: Quarter number of the year (1–4).
       - name: year_key
         description: The four-digit year (e.g. 2024).
+      - name: inserted_at
+        description: Timestamp when the record was loaded into the model
+  - name: dim_location
+    columns:
+      - name: location_id
+        description: Surrogate key used to uniquely identify a location across sources
+        tests:
+          - unique
+          - not_null
+      - name: country
+        description: Title-cased country name (merged from GitHub and DataHub sources)
+        tests:
+          - not_null
+      - name: state
+        description: Title-cased state name (merged from GitHub and DataHub sources)
+        tests:
+          - not_null
+      - name: city
+        description: Title-cased city name (merged from GitHub and DataHub sources)
+        tests:
+          - not_null
+      - name: administrative_area_level
+        description: "Level of geographic granularity: 1 (country), 2 (state), or 3 (city)"
+        tests:
+          - not_null
+      - name: latitude
+        description: Decimal latitude value (prioritized from GitHub)
+        tests:
+          - not_null
+      - name: longitude
+        description: Decimal longitude value (prioritized from GitHub)
+        tests:
+          - not_null
+      - name: population
+        description: Population value of the location (from DataHub, default to 0 if null)
+        tests:
+          - not_null
+          - positive_value
+      - name: continent
+        description: Continent name joined from static country mapping
+        tests:
+          - not_null
+      - name: iso2
+        description: ISO 2-letter country code from static mapping
+        tests:
+          - not_null
+      - name: iso3
+        description: ISO 3-letter country code from static mapping
+        tests:
+          - not_null
+      - name: inserted_at
+        description: Timestamp of when the record was inserted into the model
 
   ########################################################
   #                         MARTS                        #

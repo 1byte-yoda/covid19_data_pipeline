@@ -1,4 +1,13 @@
 {{ config(unique_key='covid_id', incremental_strategy="delete+insert") }}
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model processes COVID-19 policy and testing data by:
+--     1. Selecting distinct daily records of government interventions and testing policies.
+--     2. Converting dates to a surrogate integer `date_id` for performance and consistency.
+--     3. Forward-filling missing policy values using `last_value` to maintain data continuity.
+--     4. Generating a surrogate key (`covid_id`) using `location_id` and `date_id`.
+--     5. Supporting incremental loads via `min_date` and `max_date` date filters.
+-- -----------------------------------------------------------------------------
 
 WITH covid_tests AS (
     SELECT DISTINCT

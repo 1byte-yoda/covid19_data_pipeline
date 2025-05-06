@@ -1,17 +1,41 @@
 {{ config(unique_key='row_key', incremental_strategy="delete+insert") }}
-WITH covid_datahub AS (
+-- -----------------------------------------------------------------------------
+-- Description:
+--     This dbt model processes and standardizes raw COVID-19 data by:
+--     1. Standardizing location fields (country, state, city) using macros.
+--     2. Cleansing and transforming key fields: filling nulls, formatting strings,
+--        and ensuring numeric values are positive.
+--     3. Generating derived fields, including a combined location key and
+--        a surrogate `location_id` for uniqueness.
+--     4. Supporting incremental loading using a `delete+insert` strategy
+--        bounded by `min_date` and `max_date` variables.
+-- -----------------------------------------------------------------------------
+
+WITH standardized_location_fields AS (
     SELECT
-        t.row_key
-        ,t.id
-        ,COALESCE(t.date,'1900-01-01')::DATE AS date
-        ,t.administrative_area_level
-        ,COALESCE({{ standardize_country('country') }},'Unassigned') AS country
-        ,COALESCE({{ standardize_state('state') }},'Unassigned') AS state
-        ,COALESCE(t.city,'Unassigned') AS city
-        ,LOWER(COALESCE({{ standardize_state('state') }},'Unassigned')) AS low_state
-        ,LOWER(COALESCE(t.city,'Unassigned')) AS low_city
-        ,LOWER(COALESCE({{ standardize_country('country') }},'Unassigned')) AS low_country
-        ,t.population
+        * EXCLUDE (country,state,city)
+        ,{{ standardize_country('country') }} AS country
+        ,{{ standardize_state('state') }} AS state
+        ,COALESCE(city,'Unassigned') AS city
+    FROM {{ ref ('raw_covid_datahub') }}
+)
+
+,cleansed_covid_data_hub AS (
+    SELECT
+        row_key
+        ,id
+        ,administrative_area_level
+        ,{{ title_case('country' ) }} AS country
+        ,{{ title_case('state' ) }} AS state
+        ,{{ title_case('city' ) }} AS city
+
+        -- Lowercased location fields to be used to standardize location surrogate key
+        ,LOWER(state) AS low_state
+        ,LOWER(city) AS low_city
+        ,LOWER(country) AS low_country
+
+        -- Fill Null Discrete Values with 0
+        ,COALESCE(population,0) AS population
         ,COALESCE(school_closing,0) AS school_closing
         ,COALESCE(workplace_closing,0) AS workplace_closing
         ,COALESCE(cancel_events,0) AS cancel_events
@@ -26,47 +50,48 @@ WITH covid_datahub AS (
         ,COALESCE(facial_coverings,0) AS facial_coverings
         ,COALESCE(vaccination_policy,0) AS vaccination_policy
         ,COALESCE(elderly_people_protection,0) AS elderly_people_protection
-        ,
+        ,COALESCE(date,'1900-01-01')::DATE AS date
 
-        -- Index Policies
-        CASE WHEN t.stringency_index < 0 THEN t.stringency_index * -1 ELSE t.stringency_index END AS stringency_index
-        ,CASE WHEN t.containment_health_index < 0 THEN t.containment_health_index * -1 ELSE t.containment_health_index END AS containment_health_index
-        ,CASE WHEN t.economic_support_index < 0 THEN t.economic_support_index * -1 ELSE t.economic_support_index END AS economic_support_index
-        ,
+        -- Convert Numeric Values to Positive value
+        ,ABS(stringency_index) AS stringency_index
+        ,ABS(containment_health_index) AS containment_health_index
+        ,ABS(economic_support_index) AS economic_support_index
+        ,ABS(confirmed) AS confirmed
+        ,ABS(deaths) AS deaths
+        ,ABS(recovered) AS recovered
+        ,ABS(tests) AS tests
+        ,ABS(vaccines) AS vaccines
+        ,ABS(people_vaccinated) AS people_vaccinated
+        ,ABS(people_fully_vaccinated) AS people_fully_vaccinated
+        ,ABS(hosp) AS hosp
+        ,ABS(icu) AS icu
+        ,ABS(vent) AS vent
+    FROM standardized_location_fields
+)
 
-        -- Epidemiology
-        t.confirmed
-        ,t.deaths
-        ,CASE WHEN recovered < 0 THEN recovered * -1 ELSE recovered END AS recovered
-        ,
+,derived_covid_fields AS (
+    SELECT
+        * EXCLUDE (low_country,low_state,low_city,country,state,city)
+        ,country
+        ,state
+        ,city
 
-        -- Tests
-        t.tests
-        ,t.vaccines
-        ,t.people_vaccinated
-        ,t.people_fully_vaccinated
-        ,
+        -- Derive combined_key from the cleansed location fields
+        ,CASE
+            WHEN administrative_area_level = 3 THEN CONCAT(city,', ',state,', ',country)
+            WHEN administrative_area_level = 2 THEN CONCAT(state,', ',country)
+            ELSE country
+        END AS combined_key
 
-        -- Hospitalization
-        t.hosp
-        ,t.icu
-        ,t.vent
-    FROM {{ ref ('raw_covid_datahub') }} AS t
+        -- Generate location_id from lower cased location fields
+        ,{{ dbt_utils.generate_surrogate_key(['low_country', 'low_state', 'low_city', 'administrative_area_level']) }} AS location_id
+    FROM cleansed_covid_data_hub
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['low_country', 'low_state', 'low_city', 'administrative_area_level']) }} AS location_id
-    ,{{ title_case('country' ) }} AS country
-    ,{{ title_case('state' ) }} AS state
-    ,{{ title_case('city' ) }} AS city
-    ,CASE
-        WHEN administrative_area_level = 3 THEN CONCAT(city,', ',state,', ',country)
-        WHEN administrative_area_level = 2 THEN CONCAT(state,', ',country)
-        ELSE country
-    END AS combined_key
-    ,* EXCLUDE (low_country,low_state,low_city,country,state,city)
+    *
     ,NOW() AT TIME ZONE 'UTC' AS inserted_at
-FROM covid_datahub
+FROM derived_covid_fields
 WHERE
     1 = 1
     {% if is_incremental() %}
