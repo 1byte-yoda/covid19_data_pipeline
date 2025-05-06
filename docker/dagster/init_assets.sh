@@ -10,19 +10,29 @@ SCHEMA="covid19"
 mc alias set $DST_ALIAS http://"$MINIO_ENDPOINT_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
 mc alias set $SRC_ALIAS https://s3-ap-southeast-1.amazonaws.com "" ""
 
-datasets=("covid19datahub" "github_csse_daily" "static")
+datasets=("covid19datahub" "github_csse_daily")
 
 echo "Downloading ${datasets[@]}"
 
-for prefix in ${datasets[@]}; do
-  echo "$SRC_ALIAS/$SRC_BUCKET/$SCHEMA/$prefix/ to $DST_ALIAS/$DST_BUCKET/$SCHEMA/$prefix/"
-  mc mirror "$SRC_ALIAS/$SRC_BUCKET/$SCHEMA/$prefix/" "$DST_ALIAS/$DST_BUCKET/$SCHEMA/$prefix/" --overwrite --insecure &
+MAX_RETRIES=5
+RETRY_DELAY=5
 
+for prefix in "${datasets[@]}"; do
+  (
+    attempt=1
+    until mc mirror "$SRC_ALIAS/$SRC_BUCKET/$SCHEMA/$prefix/" "$DST_ALIAS/$DST_BUCKET/$SCHEMA/$prefix/" --overwrite --insecure; do
+      if (( attempt >= MAX_RETRIES )); then
+        echo "Failed to mirror $prefix after $MAX_RETRIES attempts."
+        exit 1
+      fi
+      echo "Retrying $prefix in $RETRY_DELAY seconds (Attempt: $((++attempt))/$MAX_RETRIES)..."
+      sleep $RETRY_DELAY
+    done
+  ) &
+
+  # Limit concurrency to 2 jobs
   [[ $(jobs -r -p | wc -l) -ge 2 ]] && wait -n
 done
-
-# Fix any broken downloads from above
-mc mirror "$SRC_ALIAS/$SRC_BUCKET/$SCHEMA/" "$DST_ALIAS/$DST_BUCKET/$SCHEMA/" --overwrite --insecure
 
 wait
 echo "Copy S3 -> Local MinIO Complete."

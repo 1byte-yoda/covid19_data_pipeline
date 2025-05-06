@@ -81,7 +81,6 @@ init_infra:
 	terraform -chdir=infra/dev init
 	terraform -chdir=infra/dev apply -auto-approve
 	@echo "\nDESTINATION__FILESYSTEM__BUCKET_URL=s3://$$(terraform -chdir=infra/dev output -raw bucket_name)" >> .env
-	mc alias set minio_s3 http://"$MINIO_ENDPOINT_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
 
 tf_fmt:
 	terraform -chdir=infra/dev fmt .
