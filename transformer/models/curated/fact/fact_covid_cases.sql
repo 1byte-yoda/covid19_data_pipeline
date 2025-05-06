@@ -56,26 +56,41 @@ WITH covid_cases AS (
     QUALIFY row_num = 1
 )
 
+,covid_with_prev_cases AS (
+    SELECT
+        *
+        ,lag(confirmed) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_confirmed
+        ,lag(deaths) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_deaths
+        ,lag(recovered) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_recovered
+        ,lag(active) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_active
+    FROM unique_covid_cases
+)
+
 ,new_covid_cases AS (
     SELECT
-        * EXCLUDE (confirmed, deaths, recovered, active)
-        ,COALESCE(confirmed - lag(confirmed) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ), 0) AS confirmed
-        ,COALESCE(deaths - lag(deaths) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ), 0) AS deaths
-        ,COALESCE(recovered - lag(recovered) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ), 0) AS recovered
-        ,COALESCE(active - lag(active) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ), 0) AS active
-    FROM unique_covid_cases
+    covid_id
+    ,date_id
+    ,location_id
+    ,incident_rate
+    ,case_fatality_ratio
+    ,population
+    ,CASE WHEN prev_confirmed < confirmed THEN confirmed - prev_confirmed ELSE 0 END AS confirmed
+    ,CASE WHEN prev_deaths < deaths THEN deaths - prev_deaths ELSE 0 END AS deaths
+    ,CASE WHEN prev_recovered < recovered THEN recovered - prev_recovered ELSE 0 END AS recovered
+    ,CASE WHEN prev_active < active THEN active - prev_active ELSE 0 END AS active
+    FROM covid_with_prev_cases
 )
 
 ,recalculated_case_fatality_and_incident_rate AS (

@@ -16,16 +16,38 @@ WITH covid_tests AS (
         {% endif %}
 )
 
+,covid_with_prev_tests AS (
+    SELECT
+        *
+        ,lag(tests) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_tests
+        ,lag(vaccines) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_vaccines
+        ,lag(people_vaccinated) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_people_vaccinated
+        ,lag(people_fully_vaccinated) OVER (
+            PARTITION BY location_id
+            ORDER BY date_id
+        ) AS prev_people_fully_vaccinated
+    FROM covid_tests
+)
+
 ,new_covid_tests_with_id AS (
     SELECT
         {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
         ,location_id
         ,date_id
-        ,COALESCE(tests - LAG(tests) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS tests
-        ,COALESCE(vaccines - LAG(vaccines) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS vaccines
-        ,COALESCE(people_vaccinated - LAG(people_vaccinated) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS people_vaccinated
-        ,COALESCE(people_fully_vaccinated - LAG(people_fully_vaccinated) OVER(PARTITION BY location_id ORDER BY date_id), 0) AS people_fully_vaccinated
-    FROM covid_tests
+        ,CASE WHEN prev_tests < tests THEN tests - prev_tests ELSE 0 END AS tests
+        ,CASE WHEN prev_vaccines < vaccines THEN vaccines - prev_vaccines ELSE 0 END AS vaccines
+        ,CASE WHEN prev_people_vaccinated < people_vaccinated THEN people_vaccinated - prev_people_vaccinated ELSE 0 END AS people_vaccinated
+        ,CASE WHEN prev_people_fully_vaccinated < people_fully_vaccinated THEN people_fully_vaccinated - prev_people_fully_vaccinated ELSE 0 END AS people_fully_vaccinated
+    FROM covid_with_prev_tests
 )
 
 SELECT
