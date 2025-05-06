@@ -63,8 +63,8 @@ services:
       - ./data/duckdb/stored_secrets:/home/superset/.duckdb/stored_secrets
     depends_on:
       - dagster
-#    post_start:
-#      - command: "superset import-dashboards -p ./dashboard.zip -u ${SUPERSET_ADMIN}"
+    post_start:
+      - command: "superset import-dashboards -p /assets/covid19_global_pandemic_dashboard.zip -u ${SUPERSET_ADMIN}"
 
   postgres:
     image: postgres:14

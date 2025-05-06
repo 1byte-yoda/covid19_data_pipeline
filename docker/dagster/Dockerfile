@@ -12,17 +12,17 @@ RUN apt-get install -y --no-install-recommends curl \
 RUN curl -O https://dl.min.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && mv mc /usr/local/bin/mc
 
-COPY ./docker/dagster/init_assets.sh /init_assets.sh
-COPY ./docker/dagster/create_deltalake.py /create_deltalake.py
-COPY ./data/country_mapping.csv /data/country_mapping.csv
-
-RUN chmod +x /init_assets.sh
-
 RUN pip install uv
 
 ADD ./requirements.txt .
 
 RUN uv pip install --system -r requirements.txt
+
+COPY ./docker/dagster/init_assets.sh /init_assets.sh
+COPY ./docker/dagster/create_deltalake.py /create_deltalake.py
+COPY ./data/country_mapping.csv /data/country_mapping.csv
+
+RUN chmod +x /init_assets.sh
 
 WORKDIR /dags
 

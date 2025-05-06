@@ -10,7 +10,7 @@ USER root
 
 RUN pip install uv
 
-#COPY --chown=superset:superset ./superset/assets .
+COPY --chown=superset:superset ./docker/superset/assets /assets
 RUN uv pip install --system duckdb-engine duckdb
 USER superset
 RUN superset fab create-admin \
