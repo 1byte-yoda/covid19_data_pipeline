@@ -92,12 +92,16 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
     <tr>
       <td>Dagster</td>
       <td>Orchestration framework</td>
-      <td>Was chosen over Airflow/Mage due to its modular and typed Python Based orchestration framework which offers better local development UX. Offers open source support for Modern data stack integration which makes it easy to maintain. Good pipeline monitoring for easier pipeline maintenance, and metadata handling for data lineage and data observability. Offers Dagster Cloud for reliable and scalable Production workloads</td>
+      <td>Was chosen over Airflow/Mage due to its modular and typed Python Based orchestration framework which offers better local development UX. 
+        It also offers open source support for Modern data stack integration which makes it easy to operate.
+        There is also a built-in pipeline monitoring feature for easier data pipeline maintenance, and metadata handling for data lineage and data observability.
+        Lastly, it offers Cloud Deployment option for reliable and scalable Production workloads</td>
     </tr>
     <tr>
       <td>DBT for transformation</td>
       <td>SQL-based transformation wrapper</td>
-      <td>The T in ELT. Wrapper for SQL based transformations. It enables version control, documentation, and model dependency graphs which also has a plugin for dagster. Handles the database object creation for you, just write your SQL transformation. Also offers data testing which could be integrated with CICDs to ensure data correctness and reliability.</td>
+      <td>The T in ELT. Wrapper for SQL based transformations. It enables version control, documentation, and model dependency graphs which also has a plugin for dagster that maps the DBT DAGS into Dagster Assets.
+      Another reason for choosing DBT is that it handles the database object creation for you, just write your SQL transformation. It also offers data testing which could be integrated with CICDs to ensure data correctness and reliability.</td>
     </tr>
     <tr>
       <td>DuckDB</td>
@@ -107,17 +111,23 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
     <tr>
       <td>MinIO for Datalake</td>
       <td>Object storage</td>
-      <td>The L storage in ELT. Open source datalake which supports AWS S3. Docker compatible which makes it Portable between local development and production.</td>
+      <td>The storage for "Loading" in ELT. I used MinIO because it is an open source datalake that supports AWS S3. Given that fact, it is easy to switch and integrate between MinIO and AWS S3. 
+      It is also docker compatible which makes it Portable between local development and production.</td>
     </tr>
     <tr>
       <td>DLT</td>
       <td>Data ingestion </td>
-      <td>The E in ELT. Python based data ingestion tool which has support for various sources / destinations. Offers good job metadata management to track ingestion loads.</td>
+      <td>The E in ELT. I used DLT because it is a Python based data ingestion tool that is a ready integration module for Dagster. 
+        It also supports various sources / destinations like duckdb and S3. 
+        Lastly, it offers good job metadata management to track ingestion loads and schema evolution.</td>
     </tr>
     <tr>
       <td>Delta File Format</td>
       <td>Columnar data storage</td>
-      <td>Used alongside DLT to store the ingested data into S3. It is using Parquet behind the curtain for columnar storage which is good for our Analytics Use Case. It offers a good integration with DLT which makes it easy to operate. It is also schema Evolution ready that enables the system to be more robust to upstream schema changes</td>
+      <td>I used DeltaLake alongside DLT to store the ingested data into S3. 
+        It is using Parquet behind the curtain for columnar storage which is good for our Analytics Use Case.
+        It offers a good integration with DLT which makes it easy to operate.
+        It is also schema Evolution ready that enables the system to be more robust to upstream schema changes</td>
     </tr>
     <tr>
       <td>Docker Compose</td>
@@ -132,7 +142,7 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
     <tr>
       <td>Star Schema</td>
       <td>Analytics Data Model</td>
-      <td>A dimensional model which is composed of facts and dimension tables. This data model brings the balance between storage efficiency - just right amount of redundancy, usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling. This is perfect for our use case since our data platform will do more reading than writing.</td>
+      <td>A dimensional model which is composed of facts and dimension tables. I used this data model because it has the balance between storage efficiency - just right amount of redundancy, usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling. This is perfect for our use case since our data platform will do more reading than writing.</td>
     </tr>
     <tr>
       <td>Medallion Architecture</td>
