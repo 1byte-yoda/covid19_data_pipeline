@@ -7,7 +7,7 @@ from dagster import asset, Output, AssetMaterialization, AssetExecutionContext, 
 def register_existing_s3_data(context: AssetExecutionContext):
     start, end = date(2020, 1, 22), date(2023, 2, 28)
 
-    group_selection = AssetSelection.groups("covid")
+    group_selection = AssetSelection.groups("default")
     asset_keys = group_selection.resolve(context.repository_def.asset_graph)
     while start <= end:
         partition = start.strftime("%Y-%m-%d")

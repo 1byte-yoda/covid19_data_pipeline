@@ -17,9 +17,9 @@ class CustomDagsterDltTranslator(DagsterDltTranslator):
         return default_spec.replace_attributes(key=AssetKey(f"{data.resource.name}"), deps=deps)
 
     def get_group_name(self, dbt_resource_props: dict[str, Any]) -> Optional[str]:
-        return "covid"
+        return "default"
 
 
 class CustomDagsterDbtTranslator(DagsterDbtTranslator):
     def get_group_name(self, dbt_resource_props: dict[str, Any]) -> Optional[str]:
-        return "covid"
+        return "default"
