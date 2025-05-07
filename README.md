@@ -170,7 +170,7 @@ Below are the screenshots of the Dashboards created in Superset after the materi
 
 ---
 ## COVID19 Correlation Analysis Notebook
-To showcase the analysis thoroughly, the notebook for the analysis could be found under the `adhoc/` folder. File: [data_analysis.ipynb](https://github.com/1byte-yoda/covid19_data_pipeline/blob/master/adhoc/data_analysis.ipynb) 
+To showcase the analysis thoroughly, I created a jupyter notebook which could be found under the `adhoc/` folder. File: [data_analysis.ipynb](https://github.com/1byte-yoda/covid19_data_pipeline/blob/master/adhoc/data_analysis.ipynb) 
 
 ---
 ## Setup Instructions
