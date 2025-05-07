@@ -53,7 +53,7 @@ The pipeline is built to be reliable, scalable, and easy to maintain, demonstrat
 ---
 
 ## The Data
-Our primary dataset will come from the [COVID-19 Data Repository by Johns Hopkins University's Center for Systems Science and Engineering (CSSE)](https://github.com/CSSEGISandData/COVID-19/). This dataset includes daily updates on confirmed cases, deaths, recoveries, and active cases from various locations around the world.
+Our primary dataset will come from the [COVID-19 Data Repository by Johns Hopkins University's Center for Systems Science and Engineering (CSSE)](https://github.com/CSSEGISandData/COVID-19/). This dataset includes daily cumulative updates on confirmed cases, deaths, recoveries, and active cases from various locations around the world.
 
 To further deepen our understanding, we'll also use supplementary data from [covid19datahub.io](https://covid19datahub.io/). This additional information will allow us to explore valuable insights and identify meaningful patterns related to government policies, hospitalizations, vaccination efforts, and COVID-19 testing trends.
 
