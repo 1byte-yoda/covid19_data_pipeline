@@ -46,8 +46,9 @@
 
 ## Overview
 
-This project aims to consolidate COVID19 Data from heterogeneous data source through a data pipeline. This will enable the analysis of the famous COVID19 pandemic to extract meaningful insights.
-The pipeline is designed with robustness, scalability, and modularity in mind—showcasing practical data engineering techniques in a modern data stack.
+This project aims to bring together COVID-19 data from various sources through a well-organized data pipeline. Our goal is to help better understand the COVID-19 pandemic by making it easier to analyze data and extract valuable insights.
+
+The pipeline is built to be reliable, scalable, and easy to maintain, demonstrating practical data engineering methods using modern tools. Through this, we hope to make information clearer and more accessible—helping communities better understand the challenges brought by COVID-19.
 
 ---
 
