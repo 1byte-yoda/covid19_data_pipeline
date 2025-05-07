@@ -72,7 +72,7 @@ Below, we will define the focus area of our analysis to centralize the scope our
 8. What are the effects of government policies to COVID19 deaths / recovered / confirmed cases?
 9. Is there a positive effect on the likelihood of getting infected for those countries who have stricter policy measures?
 
-These questions has been answered by creating **SQL queries** on top of the dimension models. And it is visualized / presented through **Apache Superset Dashboard** as well as a
+These questions has been answered by creating **SQL queries** on top of the dimensional models. And it is visualized / presented through **Apache Superset Dashboard** as well as a
 **Jupyter Notebook**
 
 ---
