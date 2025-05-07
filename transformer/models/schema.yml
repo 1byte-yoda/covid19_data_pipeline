@@ -330,10 +330,16 @@ models:
         description: Resolved latitude value from multiple fields
         tests:
           - not_null
+          - dbt_utils.accepted_range:
+              min_value: -90
+              max_value: 90
       - name: longitude
         description: Resolved longitude value from multiple fields
         tests:
           - not_null
+          - dbt_utils.accepted_range:
+              min_value: -180
+              max_value: 180
       - name: administrative_area_level
         description: Granularity of the location record (1 = country, 2 = state, 3 = city)
         tests:
@@ -677,10 +683,16 @@ models:
         description: Decimal latitude value (prioritized from GitHub)
         tests:
           - not_null
+          - dbt_utils.accepted_range:
+              min_value: -90
+              max_value: 90
       - name: longitude
         description: Decimal longitude value (prioritized from GitHub)
         tests:
           - not_null
+          - dbt_utils.accepted_range:
+              min_value: -180
+              max_value: 180
       - name: population
         description: Population value of the location (from DataHub, default to 0 if null)
         tests:
