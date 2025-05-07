@@ -26,7 +26,7 @@
       <a href="#covid19-global-pandemic-dashboard-samples">COVID19 Global Pandemic Dashboard</a>
     </li>
     <li>
-      <a href="#covid19-data-analysis-notebook">Covid19 Correlation Analysis Notebook</a>
+      <a href="#covid19-correlation-analysis-notebook">Covid19 Correlation Analysis Notebook</a>
     </li>
     <li>
       <a href="#setup-instructions">Setup Instructions</a>
@@ -169,7 +169,7 @@ Below are the screenshots of the Dashboards created in Superset after the materi
 ![mds](img/covid_hospitalization_snapshot.png)
 
 ---
-## Covid19 Correlation Analysis Notebook
+## COVID19 Correlation Analysis Notebook
 To showcase the analysis thoroughly, the notebook for the analysis could be found under the `adhoc/` folder. File: [data_analysis.ipynb](https://github.com/1byte-yoda/covid19_data_pipeline/blob/master/adhoc/data_analysis.ipynb) 
 
 ---
