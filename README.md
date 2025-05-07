@@ -53,11 +53,11 @@ The pipeline is built to be reliable, scalable, and easy to maintain, demonstrat
 ---
 
 ## The Data
-The main data that we are going to use is the COVID19 Data from the [COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19/).
-The dataset contains daily cumulative reports of confirmed, death, recovered, and active cases from different administrative area levels globally.
+Our primary dataset will come from the [COVID-19 Data Repository by Johns Hopkins University's Center for Systems Science and Engineering (CSSE)](https://github.com/CSSEGISandData/COVID-19/). This dataset includes daily updates on confirmed cases, deaths, recoveries, and active cases from various locations around the world.
 
-Additionally, we will also utilize the data from [covid19datahub.io](https://covid19datahub.io/) to enrich our analysis and be able to find interesting correlations and patterns from different variables
-such as government policy measures, hospitalization, vaccination, and covid testing data.
+To further deepen our understanding, we'll also use supplementary data from [covid19datahub.io](https://covid19datahub.io/). This additional information will allow us to explore valuable insights and identify meaningful patterns related to government policies, hospitalizations, vaccination efforts, and COVID-19 testing trends.
+
+By combining these sources, we hope to gain a richer picture of how different factors have influenced the pandemic and how communities have responded over time.
 
 ---
 
@@ -73,7 +73,7 @@ Below, we will define the focus area of our analysis to centralize the scope our
 8. What are the effects of government policies to COVID19 deaths / recovered / confirmed cases?
 9. Is there a positive effect on the likelihood of getting infected for those countries who have stricter policy measures?
 
-These questions has been answered by creating **SQL queries** on top of the dimensional models. And it is visualized / presented through **Apache Superset Dashboard** as well as a
+These questions have been answered by creating **SQL queries** on top of the dimensional models. And it is visualized / presented through **Apache Superset Dashboard** as well as a
 **Jupyter Notebook**
 
 ---
@@ -82,81 +82,71 @@ These questions has been answered by creating **SQL queries** on top of the dime
 
 ---
 ## Design Decisions
-**General:** In general, I followed the KISS principle to make the design simple and to promote longevity in terms of project maintenance. Another principle I followed was
+In general, I followed the KISS principle to make the design simple and to promote longevity in terms of project maintenance. Another principle I followed was
 idempotency for better predictability and less introduction of bugs to the pipeline. Finally, graceful handling of errors... in the data ingestion layer, changes into the upstream
 data sources were handled gracefully by implementing ELT (schema on read) alongside schema registry/versioning –thanks to DLT and DeltaLake. In the transformation layer,
 data contracts were enforced in the form of DBT tests to ensure data integrity, data accuracy, and data correctness. For any data pipeline errors, alerts were handled through slack notifications.
 
 <table border="1" cellpadding="8" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Tech</th>
-      <th>Purpose</th>
-      <th>Rationale</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Dagster</td>
-      <td>Orchestration framework</td>
-      <td>Was chosen over Airflow/Mage due to its modular and typed Python Based orchestration framework which offers better local development UX. 
-        It also offers open source support for Modern data stack integration which makes it easy to operate.
-        There is also a built-in pipeline monitoring feature for easier data pipeline maintenance, and metadata handling for data lineage and data observability.
-        Lastly, it offers Cloud Deployment option for reliable and scalable Production workloads</td>
-    </tr>
-    <tr>
-      <td>DBT for transformation</td>
-      <td>SQL-based transformation wrapper</td>
-      <td>The T in ELT. Wrapper for SQL based transformations. It enables version control, documentation, and model dependency graphs which also has a plugin for dagster that maps the DBT DAGS into Dagster Assets.
-      Another reason for choosing DBT is that it handles the database object creation for you, just write your SQL transformation. It also offers data testing which could be integrated with CICDs to ensure data correctness and reliability.</td>
-    </tr>
-    <tr>
-      <td>DuckDB</td>
-      <td>Data Processing / Storage</td>
-      <td>Easy to set up/lightweight in-memory database - which makes it faster than the typical SQL databases. It supports reading/writing data from various systems like DeltaLakes. Can be easily swap with MotherDuck for a more scalable production workload.</td>
-    </tr>
-    <tr>
-      <td>MinIO for Datalake</td>
-      <td>Object storage</td>
-      <td>The storage for "Loading" in ELT. I used MinIO because it is an open source datalake that supports AWS S3. Given that fact, it is easy to switch and integrate between MinIO and AWS S3. 
-      It is also docker compatible which makes it Portable between local development and production.</td>
-    </tr>
-    <tr>
-      <td>DLT</td>
-      <td>Data ingestion </td>
-      <td>The E in ELT. I used DLT because it is a Python based data ingestion tool that is a ready integration module for Dagster. 
-        It also supports various sources / destinations like duckdb and S3. 
-        Lastly, it offers good job metadata management to track ingestion loads and schema evolution.</td>
-    </tr>
-    <tr>
-      <td>Delta File Format</td>
-      <td>Columnar data storage</td>
-      <td>I used DeltaLake alongside DLT to store the ingested data into S3. 
-        It is using Parquet behind the curtain for columnar storage which is good for our Analytics Use Case.
-        It offers a good integration with DLT which makes it easy to operate.
-        It is also schema Evolution ready that enables the system to be more robust to upstream schema changes</td>
-    </tr>
-    <tr>
-      <td>Docker Compose</td>
-      <td>Containerization</td>
-      <td>Development/Production Environment Consistency. Promotes reproducibility and consistent behavior across environments.</td>
-    </tr>
-    <tr>
-      <td>Apache Superset</td>
-      <td>Business Intelligence Visualization Tool</td>
-      <td>Modern data stack compatible. It has compatibility with Dimensional Model type of data that makes it suitable for slicing and dicing of BI data to generate reports. Offers wide range of chart types. While it offers a UI based data aggregation through drag and drop, it also offers a flexibility of transforming your data before visualizing it... this aspect is useful especially for a self-service analytics use case. It also has a built-in user access control feature which is ideal for data governance implementation.</td>
-    </tr>
-    <tr>
-      <td>Star Schema</td>
-      <td>Analytics Data Model</td>
-      <td>A dimensional model which is composed of facts and dimension tables. I used this data model because it has the balance between storage efficiency - just right amount of redundancy, usability - lesser joins due to its denormalized trait, and performance - lesser joins == lesser data processing/shuffling. This is perfect for our use case since our data platform will do more reading than writing.</td>
-    </tr>
-    <tr>
-      <td>Medallion Architecture</td>
-      <td>Data quality layering</td>
-      <td>The architecture I used to establish an increasing level of data quality in the data pipeline represented by raw, cleansed, and curated layers. This promotes separation of concern which adds up to the project maintainability.</td>
-    </tr>
-  </tbody>
+   <thead>
+      <tr>
+         <th>Tech</th>
+         <th>Purpose</th>
+         <th>Rationale</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>Dagster</td>
+         <td>Data Orchestration</td>
+         <td>I chose Dagster over Airflow/Mage because it’s a modular, Python-based framework that’s easy to work with, especially for local development. It also integrates well with modern data stacks, making it easier to manage and monitor pipelines. The built-in cloud deployment option ensures scalability for production workloads, and I appreciate its features for tracking data lineage and observability.</td>
+      </tr>
+      <tr>
+         <td>DBT for transformation</td>
+         <td>SQL Transformation</td>
+         <td>DBT is the perfect tool for SQL-based data transformations. It supports version control, documentation, and automated testing, which is crucial for data quality. It also integrates smoothly with Dagster, allowing me to manage workflows and transformations in a seamless manner.</td>
+      </tr>
+      <tr>
+         <td>DuckDB</td>
+         <td>Data Processing/Storage</td>
+         <td>I chose DuckDB because it’s lightweight and fast, thanks to its in-memory processing. It’s an efficient database that supports DeltaLake integration, and it can easily be swapped for MotherDuck when we need to scale in production.</td>
+      </tr>
+      <tr>
+         <td>MinIO for Datalake</td>
+         <td>Object Storage</td>
+         <td>I use MinIO because it’s an open-source datalake that’s compatible with AWS S3, which gives me the flexibility to switch between S3 and MinIO when needed. It's also Docker-compatible, which makes it portable for both development and production environments.</td>
+      </tr>
+      <tr>
+         <td>DLT</td>
+         <td>Data Ingestion</td>
+         <td>DLT is a Python-based tool for data ingestion that integrates well with Dagster. It supports various sources and destinations, such as DuckDB and S3, and provides excellent metadata management, making it easy to track ingestion loads and schema evolution.</td>
+      </tr>
+      <tr>
+         <td>Delta File Format</td>
+         <td>Columnar Data Storage</td>
+         <td>I use DeltaLake for data storage because it’s optimized for analytics and works well with DLT. It uses Parquet behind the scenes for columnar storage, which is perfect for our analytics use case. DeltaLake also supports schema evolution, making it more resilient to changes in upstream schemas.</td>
+      </tr>
+      <tr>
+         <td>Docker Compose</td>
+         <td>Containerization</td>
+         <td>I prefer Docker Compose for maintaining consistent environments from development to production. It ensures that my applications behave the same way in all stages, making it easier to deploy and maintain.</td>
+      </tr>
+      <tr>
+         <td>Apache Superset</td>
+         <td>Business Intelligence Visualization Tool</td>
+         <td>I use Apache Superset because it’s compatible with modern data stacks that I mentioned above, and it works well with dimensional data models. It’s great for creating visualizations and reports, with plenty of chart types to choose from. It also supports data transformations before visualizing, which is perfect for self-service analytics. The built-in access control is a bonus for ensuring proper data governance.</td>
+      </tr>
+      <tr>
+         <td>Star Schema</td>
+         <td>Analytics Data Model</td>
+         <td>The Star Schema provides a balance between storage efficiency and performance. It minimizes joins, which makes queries faster, and its denormalized structure makes it easier to work with. This model is ideal for our analytics-focused use case where reading data is more common than writing it.</td>
+      </tr>
+      <tr>
+         <td>Medallion Architecture</td>
+         <td>Data Quality Management</td>
+         <td>I use the Medallion Architecture to establish a clear separation of concerns across the data pipeline. This approach ensures that data quality increases through raw, cleansed, and curated layers, making it easier to maintain and troubleshoot the project.</td>
+      </tr>
+   </tbody>
 </table>
 
 ## Dimensional Data Model
