@@ -26,7 +26,7 @@
       <a href="#covid19-global-pandemic-dashboard-samples">COVID19 Global Pandemic Dashboard</a>
     </li>
     <li>
-      <a href="#covid19-correlation-analysis-notebook">Covid19 Correlation Analysis Notebook</a>
+      <a href="#covid19-correlation-analysis-notebook">COVID19 Correlation Analysis Notebook</a>
     </li>
     <li>
       <a href="#setup-instructions">Setup Instructions</a>
