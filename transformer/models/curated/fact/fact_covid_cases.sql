@@ -10,18 +10,34 @@
 --     6. Supporting incremental loads via `min_date` and `max_date`.
 -- -----------------------------------------------------------------------------
 
-WITH covid_cases AS (
+WITH cumulative_fixed AS (
     SELECT
         cl.location_id
-        ,t.confirmed
-        ,t.deaths
-        ,t.recovered
-        ,t.active
+        ,strftime(t.last_update::DATE,'%Y%m%d')::INT AS date_id
+        ,t.last_update AS date
+
+        -- Ensure cumulative confirmed, deaths, recovered, active don't decrease
         ,t.incident_rate
         ,t.case_fatality_ratio
-        ,t.last_update
-        ,strftime(t.last_update::DATE,'%Y%m%d')::INT AS date_id
-        ,t.confirmed * 100000 / t.incident_rate AS population
+        ,max(t.confirmed) OVER (
+            PARTITION BY cl.location_id
+            ORDER BY t.last_update
+        ) AS fixed_confirmed
+        ,max(t.deaths) OVER (
+            PARTITION BY cl.location_id
+            ORDER BY t.last_update
+        ) AS fixed_deaths
+
+        ,max(t.recovered) OVER (
+            PARTITION BY cl.location_id
+            ORDER BY t.last_update
+        ) AS fixed_recovered
+        ,max(t.active) OVER (
+            PARTITION BY cl.location_id
+            ORDER BY t.last_update
+        ) AS fixed_active
+        ,t.confirmed * 100000 / nullif(t.incident_rate,0) AS population
+
     FROM {{ ref('cleansed_github_csse_daily') }} AS t
     INNER JOIN {{ ref('cleansed_location') }} AS cl ON t.id = cl.id
     WHERE
@@ -31,82 +47,65 @@ WITH covid_cases AS (
         {% endif %}
 )
 
-,covid_cases_with_sk AS (
+,calc_daily_new_cases AS (
     SELECT
-        -- Generate the covid_id from the location_id and date_id fields
         {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
-        ,*
-    FROM covid_cases
+        ,location_id
+        ,date_id
+        ,date
+        ,population
+
+        -- Calculate daily new cases
+        ,fixed_confirmed - lag(fixed_confirmed,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS raw_daily_confirmed
+        ,fixed_deaths - lag(fixed_deaths,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS raw_daily_deaths
+        ,fixed_recovered - lag(fixed_recovered,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS raw_daily_recovered
+        ,fixed_active - lag(fixed_active,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS raw_daily_active
+
+    FROM cumulative_fixed
 )
 
-,deduped_covid_cases AS (
+,final_daily_cases AS (
     SELECT
         covid_id
-        ,location_id
-        ,confirmed
-        ,deaths
-        ,recovered
-        ,active
-        ,incident_rate
-        ,case_fatality_ratio
         ,date_id
+        ,location_id
         ,population
+
+        -- Fix negatives by replacing with zero
+        ,CASE WHEN raw_daily_confirmed < 0 THEN 0 ELSE raw_daily_confirmed END AS confirmed
+        ,CASE WHEN raw_daily_deaths < 0 THEN 0 ELSE raw_daily_deaths END AS deaths
+        ,CASE WHEN raw_daily_recovered < 0 THEN 0 ELSE raw_daily_recovered END AS recovered
+        ,CASE WHEN raw_daily_active < 0 THEN 0 ELSE raw_daily_active END AS active
+
+    FROM calc_daily_new_cases
+)
+
+,recalculated_metrics AS (
+    SELECT
+        * EXCLUDE (population)
         ,row_number() OVER (
             PARTITION BY covid_id
             ORDER BY date_id DESC
         ) AS row_num
-    FROM covid_cases_with_sk
+        ,coalesce(confirmed / nullif(population,0) * 100000,0) AS incident_rate
+        ,CASE WHEN confirmed = 0 THEN 0 ELSE deaths / confirmed END AS case_fatality_ratio
+    FROM final_daily_cases
     QUALIFY row_num = 1
-)
-
-,covid_with_prev_cases AS (
-    SELECT
-        *
-        ,lag(confirmed) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS prev_confirmed
-        ,lag(deaths) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS prev_deaths
-        ,lag(recovered) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS prev_recovered
-        ,lag(active) OVER (
-            PARTITION BY location_id
-            ORDER BY date_id
-        ) AS prev_active
-    FROM deduped_covid_cases
-)
-
-,new_covid_cases AS (
-    SELECT
-        covid_id
-        ,date_id
-        ,location_id
-        ,incident_rate
-        ,case_fatality_ratio
-        ,population
-
-        -- Automatically Correct Cumulative Values where older cases is always lower than present cases
-        ,CASE WHEN prev_confirmed < confirmed THEN confirmed - prev_confirmed ELSE 0 END AS confirmed
-        ,CASE WHEN prev_deaths < deaths THEN deaths - prev_deaths ELSE 0 END AS deaths
-        ,CASE WHEN prev_recovered < recovered THEN recovered - prev_recovered ELSE 0 END AS recovered
-        ,CASE WHEN prev_active < active THEN active - prev_active ELSE 0 END AS active
-    FROM covid_with_prev_cases
-)
-
-,recalculated_case_fatality_and_incident_rate AS (
-    SELECT
-        * EXCLUDE (incident_rate,case_fatality_ratio)
-        ,coalesce(confirmed / population * 100000,0) AS incident_rate
-        ,deaths / confirmed AS case_fatality_ratio
-    FROM new_covid_cases
 )
 
 SELECT
     *
     ,now() AT TIME ZONE 'UTC' AS inserted_at
-FROM recalculated_case_fatality_and_incident_rate
+FROM recalculated_metrics

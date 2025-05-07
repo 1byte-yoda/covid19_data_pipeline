@@ -11,68 +11,85 @@
 --     5. Implements an incremental strategy using `min_date` and `max_date` filters.
 --     6. Deduplicates using `row_number()` to return only the latest record per key.
 -- -----------------------------------------------------------------------------
+WITH cumulative_fixed AS (
+    SELECT
+        location_id
+        ,strftime(date::DATE,'%Y%m%d')::INT AS date_id
+        ,date
 
-WITH covid_tests AS (
-    SELECT DISTINCT
-        t.location_id
-        ,strftime(t.date::DATE,'%Y%m%d')::INT AS date_id
-        ,t.tests
-        ,t.vaccines
-        ,t.people_vaccinated
-        ,t.people_fully_vaccinated
-        ,t.date
-    FROM {{ ref('cleansed_covid_datahub') }} AS t
+        -- Fix decreasing cumulative tests
+        ,max(tests) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+            ROWS UNBOUNDED PRECEDING
+        ) AS fixed_tests
+        ,max(vaccines) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+            ROWS UNBOUNDED PRECEDING
+        ) AS fixed_vaccines
+        ,max(people_vaccinated) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+            ROWS UNBOUNDED PRECEDING
+        ) AS fixed_people_vaccinated
+        ,max(people_fully_vaccinated) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+            ROWS UNBOUNDED PRECEDING
+        ) AS fixed_people_fully_vaccinated
+    FROM {{ ref('cleansed_covid_datahub') }}
     WHERE
         1 = 1
         {% if is_incremental() %}
-            AND t.date >= '{{ var('min_date') }}' AND t.date <= '{{ var('max_date') }}'
+            AND date >= '{{ var('min_date') }}' AND date <= '{{ var('max_date') }}'
         {% endif %}
 )
 
-,covid_with_prev_tests AS (
-    SELECT
-        *
-        ,lag(tests) OVER (
-            PARTITION BY location_id
-            ORDER BY date
-        ) AS prev_tests
-        ,lag(vaccines) OVER (
-            PARTITION BY location_id
-            ORDER BY date
-        ) AS prev_vaccines
-        ,lag(people_vaccinated) OVER (
-            PARTITION BY location_id
-            ORDER BY date
-        ) AS prev_people_vaccinated
-        ,lag(people_fully_vaccinated) OVER (
-            PARTITION BY location_id
-            ORDER BY date
-        ) AS prev_people_fully_vaccinated
-    FROM covid_tests
-)
-
-,new_covid_tests_with_id AS (
+,daily_calculations AS (
     SELECT
         {{ dbt_utils.generate_surrogate_key(['location_id', 'date_id']) }} AS covid_id
         ,location_id
         ,date_id
         ,date
+        ,fixed_tests
+        ,fixed_vaccines
+        ,fixed_people_vaccinated
+        ,fixed_people_fully_vaccinated
 
-        -- Automatically Correct Cumulative Values where older cases is always lower than present cases
-        ,CASE WHEN prev_tests < tests THEN tests - prev_tests ELSE 0 END AS tests
-        ,CASE WHEN prev_vaccines < vaccines THEN vaccines - prev_vaccines ELSE 0 END AS vaccines
-        ,CASE WHEN prev_people_vaccinated < people_vaccinated THEN people_vaccinated - prev_people_vaccinated ELSE 0 END AS people_vaccinated
-        ,CASE WHEN prev_people_fully_vaccinated < people_fully_vaccinated THEN people_fully_vaccinated - prev_people_fully_vaccinated ELSE 0 END
-            AS people_fully_vaccinated
-    FROM covid_with_prev_tests
+        -- Deriving daily new cases
+        ,fixed_tests - lag(fixed_tests,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS daily_new_tests
+        ,fixed_vaccines - lag(fixed_vaccines,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS daily_new_vaccines
+        ,fixed_people_vaccinated - lag(fixed_people_vaccinated,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS daily_new_people_vaccinated
+        ,fixed_people_fully_vaccinated - lag(fixed_people_fully_vaccinated,1,0) OVER (
+            PARTITION BY location_id
+            ORDER BY date
+        ) AS daily_new_people_fully_vaccinated
+
+    FROM cumulative_fixed
 )
 
 SELECT
-    * EXCLUDE(date)
+    covid_id
+    ,date_id
+    ,location_id
     ,row_number() OVER (
         PARTITION BY covid_id
         ORDER BY date DESC
     ) AS row_num
+    ,CASE WHEN daily_new_tests < 0 THEN 0 ELSE daily_new_tests END AS tests
+    ,CASE WHEN daily_new_vaccines < 0 THEN 0 ELSE daily_new_vaccines END AS vaccines
+    ,CASE WHEN daily_new_people_vaccinated < 0 THEN 0 ELSE daily_new_people_vaccinated END AS people_vaccinated
+    ,CASE WHEN daily_new_people_fully_vaccinated < 0 THEN 0 ELSE daily_new_people_fully_vaccinated END AS people_fully_vaccinated
     ,now() AT TIME ZONE 'UTC' AS inserted_at
-FROM new_covid_tests_with_id
+FROM daily_calculations
 QUALIFY row_num = 1

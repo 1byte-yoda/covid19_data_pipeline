@@ -53,19 +53,19 @@ WITH standardized_location_fields AS (
         ,COALESCE(date,'1900-01-01')::DATE AS date
 
         -- Convert Numeric Values to Positive value
-        ,COALESCE(ABS(stringency_index), 0) AS stringency_index
-        ,COALESCE(ABS(containment_health_index), 0) AS containment_health_index
-        ,COALESCE(ABS(economic_support_index), 0) AS economic_support_index
-        ,COALESCE(ABS(confirmed), 0) AS confirmed
-        ,COALESCE(ABS(deaths), 0) AS deaths
-        ,COALESCE(ABS(recovered), 0) AS recovered
-        ,COALESCE(ABS(tests), 0) AS tests
-        ,COALESCE(ABS(vaccines), 0) AS vaccines
-        ,COALESCE(ABS(people_vaccinated), 0) AS people_vaccinated
-        ,COALESCE(ABS(people_fully_vaccinated), 0) AS people_fully_vaccinated
-        ,COALESCE(ABS(hosp), 0) AS hosp
-        ,COALESCE(ABS(icu), 0) AS icu
-        ,COALESCE(ABS(vent), 0) AS vent
+        ,COALESCE(ABS(stringency_index),0) AS stringency_index
+        ,COALESCE(ABS(containment_health_index),0) AS containment_health_index
+        ,COALESCE(ABS(economic_support_index),0) AS economic_support_index
+        ,COALESCE(ABS(confirmed),0) AS confirmed
+        ,COALESCE(ABS(deaths),0) AS deaths
+        ,COALESCE(ABS(recovered),0) AS recovered
+        ,COALESCE(ABS(tests),0) AS tests
+        ,COALESCE(ABS(vaccines),0) AS vaccines
+        ,COALESCE(ABS(people_vaccinated),0) AS people_vaccinated
+        ,COALESCE(ABS(people_fully_vaccinated),0) AS people_fully_vaccinated
+        ,COALESCE(ABS(hosp),0) AS hosp
+        ,COALESCE(ABS(icu),0) AS icu
+        ,COALESCE(ABS(vent),0) AS vent
     FROM standardized_location_fields
 )
 

@@ -22,12 +22,12 @@ WITH standardized_incident_rate AS (
         id
 
         -- Get the absolute values of numeric fields.
-        ,COALESCE(ABS(confirmed), 0) AS confirmed
-        ,COALESCE(ABS(deaths), 0) AS deaths
-        ,COALESCE(ABS(recovered), 0) AS recovered
-        ,COALESCE(ABS(active), 0) AS active
-        ,COALESCE(ABS(case_fatality_ratio), 0) AS case_fatality_ratio
-        ,COALESCE(ABS(incident_rate), 0) AS incident_rate
+        ,COALESCE(ABS(confirmed),0) AS confirmed
+        ,COALESCE(ABS(deaths),0) AS deaths
+        ,COALESCE(ABS(recovered),0) AS recovered
+        ,COALESCE(ABS(active),0) AS active
+        ,COALESCE(ABS(case_fatality_ratio),0) AS case_fatality_ratio
+        ,COALESCE(ABS(incident_rate),0) AS incident_rate
 
         -- Try Parsing timestamp field
         ,{{ try_parse_timestamp('last_update') }} AS last_update
