@@ -157,12 +157,17 @@ data contracts were enforced in the form of DBT tests to ensure data integrity, 
 
 ---
 ## COVID19 Global Pandemic Dashboard Samples
+Below are the screenshots of the Dashboards created in Superset after the materialization of all assets, and after DBT transformed the data -- from 2020 to 2023.
 ### Covid Cases Dashboard
 ![mds](img/covid_cases_snapshot.png)
 
 ---
 ### Covid Hospitalization Dashboard
 ![mds](img/covid_hospitalization_snapshot.png)
+
+---
+## Covid19 Data Analysis Notebook
+To showcase the analysis thoroughly, the notebook for the analysis could be found under the `adhoc/` folder. Filename: `data_analysis.ipynb` 
 
 ---
 ## Setup Instructions
